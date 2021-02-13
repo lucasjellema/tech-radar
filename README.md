@@ -1,6 +1,27 @@
-# Motivation
+# AMIS | Conclusion Technology Radar
+
+Clone from the Zalando Tech Radar (https://github.com/zalando/tech-radar)
+
+A number of modifications are intended:
+= technology selection for AMIS
+- richer data model for the blips (the entries in the radar)
+- extended presentation for the blips
+  - size
+  - color
+  - shape
+  - content of bubble/balloon text
+  - filter on labels
+  - tag cloud for the labels?
+  - additional attributes for blips: 
+    - rationale
+    - logo
+    - vendor
+    - priority/weight (volume)
+
+# Original Motivation by Zalando
 
 At [Zalando](http://zalando.de), we maintain a [public Tech
+
 Radar](http://zalando.github.io/tech-radar/) to help our engineering teams
 align on technology choices. It is based on the [pioneering work
 by ThoughtWorks](https://www.thoughtworks.com/radar).

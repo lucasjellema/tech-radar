@@ -20,9 +20,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// radial_min / radial_max are multiples of PI
+const quadrants = [
+  { radial_min: 0, radial_max: 0.5, factor_x: 1, factor_y: 1 },
+  { radial_min: 0.5, radial_max: 1, factor_x: -1, factor_y: 1 },
+  { radial_min: -1, radial_max: -0.5, factor_x: -1, factor_y: -1 },
+  { radial_min: -0.5, radial_max: 0, factor_x: 1, factor_y: -1 }
+];
+
+const rings = [
+  { radius: 130 },
+  { radius: 220 },
+  { radius: 310 },
+  { radius: 400 }
+];
+
+const title_offset =
+  { x: -675, y: -420 };
+
+const footer_offset =
+  { x: -675, y: 420 };
+
+const legend_offset = [
+  { x: 450, y: 90 },
+  { x: -675, y: 90 },
+  { x: -675, y: -310 },
+  { x: 450, y: -310 }
+];
+
+let configuration;
 
 function radar_visualization(config) {
-
+  configuration = config
   // custom random number generator, to make random sequence reproducible
   // source: https://stackoverflow.com/questions/521295
   var seed = 42;
@@ -39,34 +68,7 @@ function radar_visualization(config) {
     return min + (random() + random()) * 0.5 * (max - min);
   }
 
-  // radial_min / radial_max are multiples of PI
-  const quadrants = [
-    { radial_min: 0, radial_max: 0.5, factor_x: 1, factor_y: 1 },
-    { radial_min: 0.5, radial_max: 1, factor_x: -1, factor_y: 1 },
-    { radial_min: -1, radial_max: -0.5, factor_x: -1, factor_y: -1 },
-    { radial_min: -0.5, radial_max: 0, factor_x: 1, factor_y: -1 }
-  ];
-
-  const rings = [
-    { radius: 130 },
-    { radius: 220 },
-    { radius: 310 },
-    { radius: 400 }
-  ];
-
-  const title_offset =
-    { x: -675, y: -420 };
-
-  const footer_offset =
-    { x: -675, y: 420 };
-
-  const legend_offset = [
-    { x: 450, y: 90 },
-    { x: -675, y: 90 },
-    { x: -675, y: -310 },
-    { x: 450, y: -310 }
-  ];
-
+  
   function polar(cartesian) {
     var x = cartesian.x;
     var y = cartesian.y;
@@ -178,9 +180,6 @@ function radar_visualization(config) {
     }
   }
 
-  function translate(x, y) {
-    return "translate(" + x + "," + y + ")";
-  }
 
   function viewbox(quadrant) {
     return [
@@ -203,166 +202,26 @@ function radar_visualization(config) {
     radar.attr("transform", translate(config.width / 2, config.height / 2));
   }
 
-  var grid = radar.append("g");
-
-  // draw grid lines
-  grid.append("line")
-    .attr("x1", 0).attr("y1", -400)
-    .attr("x2", 0).attr("y2", 400)
-    .style("stroke", config.colors.grid)
-    .style("stroke-width", 1);
-  grid.append("line")
-    .attr("x1", -400).attr("y1", 0)
-    .attr("x2", 400).attr("y2", 0)
-    .style("stroke", config.colors.grid)
-    .style("stroke-width", 1);
-
-  // background color. Usage `.attr("filter", "url(#solid)")`
-  // SOURCE: https://stackoverflow.com/a/31013492/2609980
-  var defs = grid.append("defs");
-  var filter = defs.append("filter")
-    .attr("x", 0)
-    .attr("y", 0)
-    .attr("width", 1)
-    .attr("height", 1)
-    .attr("id", "solid");
-  filter.append("feFlood")
-    .attr("flood-color", "rgb(0, 0, 0, 0.8)");
-  filter.append("feComposite")
-    .attr("in", "SourceGraphic");
+  var grid = drawRadar(radar, config);
 
   // draw rings
-  for (var i = 0; i < rings.length; i++) {
-    grid.append("circle")
-      .attr("cx", 0)
-      .attr("cy", 0)
-      .attr("r", rings[i].radius)
-      .style("fill", "none")
-      .style("stroke", config.colors.grid)
-      .style("stroke-width", 1);
-    if (config.print_layout) {
-      grid.append("text")
-        .text(config.rings[i].name)
-        .attr("y", -rings[i].radius + 62)
-        .attr("text-anchor", "middle")
-        .style("fill", "#e5e5e5")
-        .style("font-family", "Arial, Helvetica")
-        .style("font-size", "42px")
-        .style("font-weight", "bold")
-        .style("pointer-events", "none")
-        .style("user-select", "none");
-    }
-  }
+  drawRings( rings, grid, config);
 
-  function legend_transform(quadrant, ring, index=null) {
-    var dx = ring < 2 ? 0 : 120;
-    var dy = (index == null ? -16 : index * 12);
-    if (ring % 2 === 1) {
-      dy = dy + 36 + segmented[quadrant][ring-1].length * 12;
-    }
-    return translate(
-      legend_offset[quadrant].x + dx,
-      legend_offset[quadrant].y + dy
-    );
-  }
 
   // draw title and legend (only in print layout)
   if (config.print_layout) {
 
-    // title
-    radar.append("text")
-      .attr("transform", translate(title_offset.x, title_offset.y))
-      .text(config.title)
-      .style("font-family", "Arial, Helvetica")
-      .style("font-size", "34px");
-
-    // footer
-    radar.append("text")
-      .attr("transform", translate(footer_offset.x, footer_offset.y))
-      .text("▲ moved up     ▼ moved down")
-      .attr("xml:space", "preserve")
-      .style("font-family", "Arial, Helvetica")
-      .style("font-size", "10px");
-
-    // legend
-    var legend = radar.append("g");
-    for (var quadrant = 0; quadrant < 4; quadrant++) {
-      legend.append("text")
-        .attr("transform", translate(
-          legend_offset[quadrant].x,
-          legend_offset[quadrant].y - 45
-        ))
-        .text(config.quadrants[quadrant].name)
-        .style("font-family", "Arial, Helvetica")
-        .style("font-size", "18px");
-      for (var ring = 0; ring < 4; ring++) {
-        legend.append("text")
-          .attr("transform", legend_transform(quadrant, ring))
-          .text(config.rings[ring].name)
-          .style("font-family", "Arial, Helvetica")
-          .style("font-size", "12px")
-          .style("font-weight", "bold");
-        legend.selectAll(".legend" + quadrant + ring)
-          .data(segmented[quadrant][ring])
-          .enter()
-            .append("a")
-                .attr("href", function (d, i) {
-                  return d.link ? d.link : "#"; // stay on same page if no link was provided
-                })
-            .append("text")
-              .attr("transform", function(d, i) { return legend_transform(quadrant, ring, i); })
-              .attr("class", "legend" + quadrant + ring)
-              .attr("id", function(d, i) { return "legendItem" + d.id; })
-              .text(function(d, i) { return d.id + ". " + d.label; })
-              .style("font-family", "Arial, Helvetica")
-              .style("font-size", "11px")
-              .on("mouseover", function(d) { showBubble(d); highlightLegendItem(d); })
-              .on("mouseout", function(d) { hideBubble(d); unhighlightLegendItem(d); });
-      }
-    }
+    drawLegend(radar, translate, title_offset, config, footer_offset, quadrant, legend_offset, ring, segmented, showBubble, highlightLegendItem, hideBubble, unhighlightLegendItem);
   }
 
   // layer for entries
   var rink = radar.append("g")
     .attr("id", "rink");
 
-  // rollover bubble (on top of everything else)
-  var bubble = radar.append("g")
-    .attr("id", "bubble")
-    .attr("x", 0)
-    .attr("y", 0)
-    .style("opacity", 0)
-    .style("pointer-events", "none")
-    .style("user-select", "none");
-  bubble.append("rect")
-    .attr("rx", 4)
-    .attr("ry", 4)
-    .style("fill", "#333");
-  bubble.append("text")
-    .style("font-family", "sans-serif")
-    .style("font-size", "10px")
-    .style("fill", "#fff");
-  bubble.append("path")
-    .attr("d", "M 0,0 10,0 5,8 z")
-    .style("fill", "#333");
+  // rollover bubble/text balloon (on top of everything else)
+  initializeTextBalloon(radar);
 
-  function showBubble(d) {
-    if (d.active || config.print_layout) {
-      var tooltip = d3.select("#bubble text")
-        .text(d.label);
-      var bbox = tooltip.node().getBBox();
-      d3.select("#bubble")
-        .attr("transform", translate(d.x - bbox.width / 2, d.y - 16))
-        .style("opacity", 0.8);
-      d3.select("#bubble rect")
-        .attr("x", -5)
-        .attr("y", -bbox.height)
-        .attr("width", bbox.width + 10)
-        .attr("height", bbox.height + 4);
-      d3.select("#bubble path")
-        .attr("transform", translate(bbox.width / 2 - 5, 3));
-    }
-  }
+
 
   function hideBubble(d) {
     var bubble = d3.select("#bubble")
@@ -388,7 +247,7 @@ function radar_visualization(config) {
     .enter()
       .append("g")
         .attr("class", "blip")
-        .attr("transform", function(d, i) { return legend_transform(d.quadrant, d.ring, i); })
+        .attr("transform", function(d, i) { return legend_transform(d.quadrant, d.ring, segmented, i); })
         .on("mouseover", function(d) { showBubble(d); highlightLegendItem(d); })
         .on("mouseout", function(d) { hideBubble(d); unhighlightLegendItem(d); });
 
@@ -402,6 +261,8 @@ function radar_visualization(config) {
         .attr("xlink:href", d.link);
     }
 
+    // here the shape to be drawn is determined, including its size
+    // todo: stop sign for entries no longer used?
     // blip shape
     if (d.moved > 0) {
       blip.append("path")
@@ -413,7 +274,7 @@ function radar_visualization(config) {
         .style("fill", d.color);
     } else {
       blip.append("circle")
-        .attr("r", 9)
+        .attr("r", getCircleRadiusForBlip(d)) // here we can determine the size of the circle - based on the properties of the entry
         .attr("fill", d.color);
     }
 
@@ -445,4 +306,185 @@ function radar_visualization(config) {
     .velocityDecay(0.19) // magic number (found by experimentation)
     .force("collision", d3.forceCollide().radius(12).strength(0.85))
     .on("tick", ticked);
+}
+
+// here the font color, font family and font sizxe for the bubble or balloon is defined
+function initializeTextBalloon(radar) {
+  var bubble = radar.append("g")
+    .attr("id", "bubble")
+    .attr("x", 0)
+    .attr("y", 0)
+    .style("opacity", 0)
+    .style("pointer-events", "none")
+    .style("user-select", "none");
+  bubble.append("rect")
+    .attr("rx", 4)
+    .attr("ry", 4)
+    .style("fill", "#333") // color of balloon
+    ;
+  bubble.append("text")
+    .style("font-family", "sans-serif")
+    .style("font-size", "10px")
+    .style("fill", "#fff");
+  bubble.append("path")
+    .attr("d", "M 0,0 10,0 5,8 z")
+    .style("fill", "#333");
+}
+
+  // this function shows the text balloon with contents and determines its size
+  // here we can content to the text balloon, such as rationale, logo, description, 
+  const showBubble = function(d) {
+    if (d.active || configuration.print_layout) {
+      var tooltip = d3.select("#bubble text")
+        .text(d.label);
+      var bbox = tooltip.node().getBBox();
+      d3.select("#bubble")
+        .attr("transform", translate(d.x - bbox.width / 2, d.y - 16))
+        .style("opacity", 0.8);
+      d3.select("#bubble rect")
+        .attr("x", -5)
+        .attr("y", -bbox.height)
+        .attr("width", bbox.width + 10)
+        .attr("height", bbox.height + 4);
+      d3.select("#bubble path")
+        .attr("transform", translate(bbox.width / 2 - 5, 3));
+    }
+  }
+
+function drawLegend(radar, translate, title_offset, config, footer_offset, quadrant, legend_offset, ring, segmented, showBubble, highlightLegendItem, hideBubble, unhighlightLegendItem) {
+  radar.append("text")
+    .attr("transform", translate(title_offset.x, title_offset.y))
+    .text(config.title)
+    .style("font-family", "Arial, Helvetica")
+    .style("font-size", "34px");
+
+  // footer
+  radar.append("text")
+    .attr("transform", translate(footer_offset.x, footer_offset.y))
+    .text("▲ moved up     ▼ moved down")
+    .attr("xml:space", "preserve")
+    .style("font-family", "Arial, Helvetica")
+    .style("font-size", "10px");
+
+  // legend
+  var legend = radar.append("g");
+  for (var quadrant = 0; quadrant < 4; quadrant++) {
+    legend.append("text")
+      .attr("transform", translate(
+        legend_offset[quadrant].x,
+        legend_offset[quadrant].y - 45
+      ))
+      .text(config.quadrants[quadrant].name)
+      .style("font-family", "Arial, Helvetica")
+      .style("font-size", "18px");
+    for (var ring = 0; ring < 4; ring++) {
+      legend.append("text")
+        .attr("transform", legend_transform(quadrant, ring, segmented))
+        .text(config.rings[ring].name)
+        .style("font-family", "Arial, Helvetica")
+        .style("font-size", "12px")
+        .style("font-weight", "bold");
+      legend.selectAll(".legend" + quadrant + ring)
+        .data(segmented[quadrant][ring])
+        .enter()
+        .append("a")
+        .attr("href", function (d, i) {
+          return d.link ? d.link : "#"; // stay on same page if no link was provided
+        })
+        .append("text")
+        .attr("transform", function (d, i) { return legend_transform(quadrant, ring, segmented, i); })
+        .attr("class", "legend" + quadrant + ring)
+        .attr("id", function (d, i) { return "legendItem" + d.id; })
+        .text(function (d, i) { return d.id + ". " + d.label; })
+        .style("font-family", "Arial, Helvetica")
+        .style("font-size", "11px")
+        .on("mouseover", function (d) { showBubble(d); highlightLegendItem(d); })
+        .on("mouseout", function (d) { hideBubble(d); unhighlightLegendItem(d); });
+    }
+  }
+
+}
+
+function drawRings( rings, grid, config) {
+  for (let i = 0; i < rings.length; i++) {
+    grid.append("circle")
+      .attr("cx", 0)
+      .attr("cy", 0)
+      .attr("r", rings[i].radius)
+      .style("fill", "none")
+      .style("stroke", config.colors.grid)
+      .style("stroke-width", 1);
+    if (config.print_layout) {
+      grid.append("text")
+        .text(config.rings[i].name)
+        .attr("y", -rings[i].radius + 62)
+        .attr("text-anchor", "middle")
+        .style("fill", "#e5e5e5")
+        .style("font-family", "Arial, Helvetica")
+        .style("font-size", "42px")
+        .style("font-weight", "bold")
+        .style("pointer-events", "none")
+        .style("user-select", "none");
+    }
+  }
+}
+
+function drawRadar(radar, config) {
+  var grid = radar.append("g");
+
+  // draw grid lines
+  grid.append("line")
+    .attr("x1", 0).attr("y1", -400)
+    .attr("x2", 0).attr("y2", 400)
+    .style("stroke", config.colors.grid)
+    .style("stroke-width", 1);
+  grid.append("line")
+    .attr("x1", -400).attr("y1", 0)
+    .attr("x2", 400).attr("y2", 0)
+    .style("stroke", config.colors.grid)
+    .style("stroke-width", 1);
+
+  // background color. Usage `.attr("filter", "url(#solid)")`
+  // SOURCE: https://stackoverflow.com/a/31013492/2609980
+  var defs = grid.append("defs");
+  var filter = defs.append("filter")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", 1)
+    .attr("height", 1)
+    .attr("id", "solid");
+  filter.append("feFlood")
+    .attr("flood-color", "rgb(0, 0, 0, 0.8)");
+  filter.append("feComposite")
+    .attr("in", "SourceGraphic");
+  return grid;
+}
+
+
+function translate(x, y) {
+  return "translate(" + x + "," + y + ")";
+}
+
+function legend_transform(quadrant, ring, segmented, index=null) {
+  var dx = ring < 2 ? 0 : 120;
+  var dy = (index == null ? -16 : index * 12);
+  if (ring % 2 === 1) {
+    dy = dy + 36 + segmented[quadrant][ring-1].length * 12;
+  }
+  return translate(
+    legend_offset[quadrant].x + dx,
+    legend_offset[quadrant].y + dy
+  );
+}
+
+// this function determines what the radius should be for the circle to be drawn for this entry
+// note: the original value for all blips was 9
+const originalBlipRadius = 9 
+const getCircleRadiusForBlip = function (entry) {
+  // here we can use properties of the entry to increase or decrease the size of the blip
+  let radius = originalBlipRadius
+  if (entry.importance) {
+    radius = radius * entry.importance
+  }
+  return radius
 }
