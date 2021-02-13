@@ -68,7 +68,7 @@ function radar_visualization(config) {
     return min + (random() + random()) * 0.5 * (max - min);
   }
 
-  
+
   function polar(cartesian) {
     var x = cartesian.x;
     var y = cartesian.y;
@@ -123,19 +123,19 @@ function radar_visualization(config) {
       y: rings[3].radius * quadrants[quadrant].factor_y
     };
     return {
-      clipx: function(d) {
+      clipx: function (d) {
         var c = bounded_box(d, cartesian_min, cartesian_max);
         var p = bounded_ring(polar(c), polar_min.r + 15, polar_max.r - 15);
         d.x = cartesian(p).x; // adjust data too!
         return d.x;
       },
-      clipy: function(d) {
+      clipy: function (d) {
         var c = bounded_box(d, cartesian_min, cartesian_max);
         var p = bounded_ring(polar(c), polar_min.r + 15, polar_max.r - 15);
         d.y = cartesian(p).y; // adjust data too!
         return d.y;
       },
-      random: function() {
+      random: function () {
         return cartesian({
           t: random_between(polar_min.t, polar_max.t),
           r: normal_between(polar_min.r, polar_max.r)
@@ -163,18 +163,18 @@ function radar_visualization(config) {
       segmented[quadrant][ring] = [];
     }
   }
-  for (var i=0; i<config.entries.length; i++) {
+  for (var i = 0; i < config.entries.length; i++) {
     var entry = config.entries[i];
     segmented[entry.quadrant][entry.ring].push(entry);
   }
 
   // assign unique sequential id to each entry
   var id = 1;
-  for (var quadrant of [2,3,1,0]) {
+  for (var quadrant of [2, 3, 1, 0]) {
     for (var ring = 0; ring < 4; ring++) {
       var entries = segmented[quadrant][ring];
-      entries.sort(function(a,b) { return a.label.localeCompare(b.label); })
-      for (var i=0; i<entries.length; i++) {
+      entries.sort(function (a, b) { return a.label.localeCompare(b.label); })
+      for (var i = 0; i < entries.length; i++) {
         entries[i].id = "" + id++;
       }
     }
@@ -205,7 +205,7 @@ function radar_visualization(config) {
   var grid = drawRadar(radar, config);
 
   // draw rings
-  drawRings( rings, grid, config);
+  drawRings(rings, grid, config);
 
 
   // draw title and legend (only in print layout)
@@ -225,7 +225,7 @@ function radar_visualization(config) {
 
   function hideBubble(d) {
     var bubble = d3.select("#bubble")
-      .attr("transform", translate(0,0))
+      .attr("transform", translate(0, 0))
       .style("opacity", 0);
   }
 
@@ -245,14 +245,14 @@ function radar_visualization(config) {
   var blips = rink.selectAll(".blip")
     .data(config.entries)
     .enter()
-      .append("g")
-        .attr("class", "blip")
-        .attr("transform", function(d, i) { return legend_transform(d.quadrant, d.ring, segmented, i); })
-        .on("mouseover", function(d) { showBubble(d); highlightLegendItem(d); })
-        .on("mouseout", function(d) { hideBubble(d); unhighlightLegendItem(d); });
+    .append("g")
+    .attr("class", "blip")
+    .attr("transform", function (d, i) { return legend_transform(d.quadrant, d.ring, segmented, i); })
+    .on("mouseover", function (d) { showBubble(d); highlightLegendItem(d); })
+    .on("mouseout", function (d) { hideBubble(d); unhighlightLegendItem(d); });
 
   // configure each blip
-  blips.each(function(d) {
+  blips.each(function (d) {
     var blip = d3.select(this);
 
     // blip link
@@ -273,12 +273,23 @@ function radar_visualization(config) {
         .attr("d", "M -11,-5 11,-5 0,13 z") // triangle pointing down
         .style("fill", d.color);
     } else {
-      blip.append("circle")
-        .attr("r", getCircleRadiusForBlip(d)) // here we can determine the size of the circle - based on the properties of the entry
-        .attr("fill", d.color);
+      if (d.logo) {
+        blip.append('image')
+          .attr('xlink:href', d.logo)
+          .attr('width', 80)
+          .attr('height', 30)
+          .attr("x", "-40")
+          .attr("y", "-15")
+      }
+      else {
+        blip.append("circle")
+          .attr("r", getCircleRadiusForBlip(d)) // here we can determine the size of the circle - based on the properties of the entry
+          .attr("fill", d.color)
+        //.style("fill", `url(${d.logo})`)
+      }
     }
 
-    // blip text
+    // blip text to be printed inside the shape - currently the randomly assigned sequence number
     if (d.active || config.print_layout) {
       var blip_text = config.print_layout ? d.id : d.label.match(/[a-z]/i);
       blip.append("text")
@@ -287,7 +298,7 @@ function radar_visualization(config) {
         .attr("text-anchor", "middle")
         .style("fill", "#fff")
         .style("font-family", "Arial, Helvetica")
-        .style("font-size", function(d) { return blip_text.length > 2 ? "8px" : "9px"; })
+        .style("font-size", function (d) { return blip_text.length > 2 ? "8px" : "9px"; })
         .style("pointer-events", "none")
         .style("user-select", "none");
     }
@@ -295,7 +306,7 @@ function radar_visualization(config) {
 
   // make sure that blips stay inside their segment
   function ticked() {
-    blips.attr("transform", function(d) {
+    blips.attr("transform", function (d) {
       return translate(d.segment.clipx(d), d.segment.clipy(d));
     })
   }
@@ -331,25 +342,25 @@ function initializeTextBalloon(radar) {
     .style("fill", "#333");
 }
 
-  // this function shows the text balloon with contents and determines its size
-  // here we can content to the text balloon, such as rationale, logo, description, 
-  const showBubble = function(d) {
-    if (d.active || configuration.print_layout) {
-      var tooltip = d3.select("#bubble text")
-        .text(d.label);
-      var bbox = tooltip.node().getBBox();
-      d3.select("#bubble")
-        .attr("transform", translate(d.x - bbox.width / 2, d.y - 16))
-        .style("opacity", 0.8);
-      d3.select("#bubble rect")
-        .attr("x", -5)
-        .attr("y", -bbox.height)
-        .attr("width", bbox.width + 10)
-        .attr("height", bbox.height + 4);
-      d3.select("#bubble path")
-        .attr("transform", translate(bbox.width / 2 - 5, 3));
-    }
+// this function shows the text balloon with contents and determines its size
+// here we can content to the text balloon, such as rationale, logo, description, 
+const showBubble = function (d) {
+  if (d.active || configuration.print_layout) {
+    var tooltip = d3.select("#bubble text")
+      .text(d.label);
+    var bbox = tooltip.node().getBBox();
+    d3.select("#bubble")
+      .attr("transform", translate(d.x - bbox.width / 2, d.y - 16))
+      .style("opacity", 0.8);
+    d3.select("#bubble rect")
+      .attr("x", -5)
+      .attr("y", -bbox.height)
+      .attr("width", bbox.width + 10)
+      .attr("height", bbox.height + 4);
+    d3.select("#bubble path")
+      .attr("transform", translate(bbox.width / 2 - 5, 3));
   }
+}
 
 function drawLegend(radar, translate, title_offset, config, footer_offset, quadrant, legend_offset, ring, segmented, showBubble, highlightLegendItem, hideBubble, unhighlightLegendItem) {
   radar.append("text")
@@ -405,7 +416,7 @@ function drawLegend(radar, translate, title_offset, config, footer_offset, quadr
 
 }
 
-function drawRings( rings, grid, config) {
+function drawRings(rings, grid, config) {
   for (let i = 0; i < rings.length; i++) {
     grid.append("circle")
       .attr("cx", 0)
@@ -465,11 +476,11 @@ function translate(x, y) {
   return "translate(" + x + "," + y + ")";
 }
 
-function legend_transform(quadrant, ring, segmented, index=null) {
+function legend_transform(quadrant, ring, segmented, index = null) {
   var dx = ring < 2 ? 0 : 120;
   var dy = (index == null ? -16 : index * 12);
   if (ring % 2 === 1) {
-    dy = dy + 36 + segmented[quadrant][ring-1].length * 12;
+    dy = dy + 36 + segmented[quadrant][ring - 1].length * 12;
   }
   return translate(
     legend_offset[quadrant].x + dx,
@@ -479,7 +490,7 @@ function legend_transform(quadrant, ring, segmented, index=null) {
 
 // this function determines what the radius should be for the circle to be drawn for this entry
 // note: the original value for all blips was 9
-const originalBlipRadius = 9 
+const originalBlipRadius = 9
 const getCircleRadiusForBlip = function (entry) {
   // here we can use properties of the entry to increase or decrease the size of the blip
   let radius = originalBlipRadius
