@@ -18,6 +18,53 @@ A number of modifications are intended:
     - vendor
     - priority/weight (volume)
 
+
+# Entries
+The file entries.js contain the data that is visualized in the radar. This seem data could be retrieved using an HTTP request to an API or from an external URL.
+
+Each entry represents both:
+* objective: a technology, concept, product, cloud service, open source project
+* subjective: our and the community's assessment (the blip on the radar)
+
+For both angles, there are several properties identified for each entry:
+
+## Objective properties
+* name/label
+* description
+* logo
+* homepage
+* vendor /sponsor
+* birthyear / year of first occurrence
+* timestamp of last major release
+* category (for example concept, technique/process, tool, platform & infra, language, framework/library - something that becomes part of custom software)
+* licenseModel (oss, commercial)
+* tags (more descriptors that characterize the entry - for example: database, nosql, managed, saas, container, security )
+
+## Context sensitive properties 
+* who
+* when
+* scope (personal, department, company, ecosystem, world)
+* community sentiment (market share, GitHub stars, stackoverflow activity, appetite, ...)
+* analyst rating
+* current status (where are we now? )
+* ambition/ desired status (for example: wait, investigate, learn, apply (full force), retire/reduce, do not use anymore)
+* size/relevance/scale 
+* rationale/motivation (explanation of the the subjective ratings)
+
+# Radar elements
+
+The radar has a well known appearance. It shows four concentric circles - the rings - that are divided into four areas by two orthogonal lines (that could be interpreted as axes) - the quadrants. The rings and quadrants are used to convey information: the location of each entry on the radar is meaningful.
+
+Traditionally, the rings indicate the status assigned to an entry (hold, assess, trial, adopt are the original values) and the quadrants indicate the category of an entry (for examples tools, platforms, languages & frameworks, techniques).  
+![](images/radar-traditional.png)
+These work fine. However, it is quite possible to also present the entries in different configurations of the quadrants and rings.
+
+* Quadrants - the radar is divided into four areas; these areas can be made to mean different things. A common designation is by category. Another could be by status (growth-share matrix, Gartner hypecycle, Gartner maqic qudadrant/Forrester Wave) or by any other grouping (such as AWS, Azure, GCP and others) or even by assessment (which is originally plotted in rings) 
+* Rings - the four rings originally were used to visualize assessment (hold, assess, trial, adopt - indicating the ambition); rings can be used in different ways - such as maturity (how long a technology has been around), relevance to the company, community sentiment, marketshare, number of users within company
+* Blips - each entry (tool, technology, ..) is plotted somewhere on the radar - in a quadrant and a ring. The blip itself can have visual characteristics: size, color, shape, icon. Each visual characteristic can be used to express something. For example: size to indicate the relative importance, color or shape to indicate ambition (while ring is used to indicate current situation) or vibrancy (how alive and kicking is the entry - based on market adoption, community activity, vendor involvement, release). Note: instead of plotting shapes we could use logo's or name badges for plotting the blips; we lose some of the details, but gain in instant recognition.  
+
+
+
 # Original Motivation by Zalando
 
 At [Zalando](http://zalando.de), we maintain a [public Tech
