@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+export {radar_visualization} 
 // radial_min / radial_max are multiples of PI
 const quadrants = [
   { radial_min: 0, radial_max: 0.5, factor_x: 1, factor_y: 1 },
@@ -190,6 +191,14 @@ function radar_visualization(config) {
     ].join(" ");
   }
 
+  // remove any existing content in the SVG element 
+  // this allow for a clean refresh - when controls governing the visualization have changed 
+  const currentSVG = document.getElementById(config.svg_id);
+  if (currentSVG.firstChild) {
+    currentSVG.removeChild(currentSVG.firstChild)
+  }
+  
+  // draw the radar and its contents
   var svg = d3.select("svg#" + config.svg_id)
     .style("background-color", config.colors.background)
     .attr("width", config.width)
@@ -202,15 +211,9 @@ function radar_visualization(config) {
     radar.attr("transform", translate(config.width / 2, config.height / 2));
   }
 
-  var grid = drawRadar(radar, config);
-
-  // draw rings
+  var grid = drawRadarGrid(radar, config);
   drawRings(rings, grid, config);
-
-
-  // draw title and legend (only in print layout)
   if (config.print_layout) {
-
     drawLegend(radar, translate, title_offset, config, footer_offset, quadrant, legend_offset, ring, segmented, showBubble, highlightLegendItem, hideBubble, unhighlightLegendItem);
   }
 
@@ -218,91 +221,8 @@ function radar_visualization(config) {
   var rink = radar.append("g")
     .attr("id", "rink");
 
-  // rollover bubble/text balloon (on top of everything else)
   initializeTextBalloon(radar);
-
-
-
-  function hideBubble(d) {
-    var bubble = d3.select("#bubble")
-      .attr("transform", translate(0, 0))
-      .style("opacity", 0);
-  }
-
-  function highlightLegendItem(d) {
-    var legendItem = document.getElementById("legendItem" + d.id);
-    legendItem.setAttribute("filter", "url(#solid)");
-    legendItem.setAttribute("fill", "white");
-  }
-
-  function unhighlightLegendItem(d) {
-    var legendItem = document.getElementById("legendItem" + d.id);
-    legendItem.removeAttribute("filter");
-    legendItem.removeAttribute("fill");
-  }
-
-  // draw blips on radar
-  var blips = rink.selectAll(".blip")
-    .data(config.entries)
-    .enter()
-    .append("g")
-    .attr("class", "blip")
-    .attr("transform", function (d, i) { return legend_transform(d.quadrant, d.ring, segmented, i); })
-    .on("mouseover", function (d) { showBubble(d); highlightLegendItem(d); })
-    .on("mouseout", function (d) { hideBubble(d); unhighlightLegendItem(d); });
-
-  // configure each blip
-  blips.each(function (d) {
-    var blip = d3.select(this);
-
-    // blip link
-    if (!config.print_layout && d.active && d.hasOwnProperty("link")) {
-      blip = blip.append("a")
-        .attr("xlink:href", d.link);
-    }
-
-    // here the shape to be drawn is determined, including its size
-    // todo: stop sign for entries no longer used?
-    // blip shape
-    if (d.moved > 0) {
-      blip.append("path")
-        .attr("d", "M -11,5 11,5 0,-13 z") // triangle pointing up
-        .style("fill", d.color);
-    } else if (d.moved < 0) {
-      blip.append("path")
-        .attr("d", "M -11,-5 11,-5 0,13 z") // triangle pointing down
-        .style("fill", d.color);
-    } else {
-      if (d.logo) {
-        blip.append('image')
-          .attr('xlink:href', d.logo)
-          .attr('width', 80)
-          .attr('height', 30)
-          .attr("x", "-40")
-          .attr("y", "-15")
-      }
-      else {
-        blip.append("circle")
-          .attr("r", getCircleRadiusForBlip(d)) // here we can determine the size of the circle - based on the properties of the entry
-          .attr("fill", d.color)
-        //.style("fill", `url(${d.logo})`)
-      }
-    }
-
-    // blip text to be printed inside the shape - currently the randomly assigned sequence number
-    if (d.active || config.print_layout) {
-      var blip_text = config.print_layout ? d.id : d.label.match(/[a-z]/i);
-      blip.append("text")
-        .text(blip_text)
-        .attr("y", 3)
-        .attr("text-anchor", "middle")
-        .style("fill", "#fff")
-        .style("font-family", "Arial, Helvetica")
-        .style("font-size", function (d) { return blip_text.length > 2 ? "8px" : "9px"; })
-        .style("pointer-events", "none")
-        .style("user-select", "none");
-    }
-  });
+  let blips = drawBlips(config, rink, segmented)
 
   // make sure that blips stay inside their segment
   function ticked() {
@@ -317,9 +237,12 @@ function radar_visualization(config) {
     .velocityDecay(0.19) // magic number (found by experimentation)
     .force("collision", d3.forceCollide().radius(12).strength(0.85))
     .on("tick", ticked);
-}
+} //end of function radar_visualization
 
-// here the font color, font family and font sizxe for the bubble or balloon is defined
+
+
+
+// here the font color, font family and font size for the bubble or balloon is defined
 function initializeTextBalloon(radar) {
   var bubble = radar.append("g")
     .attr("id", "bubble")
@@ -334,20 +257,27 @@ function initializeTextBalloon(radar) {
     .style("fill", "#333") // color of balloon
     ;
   bubble.append("text")
+    .attr("id","b1-text")
     .style("font-family", "sans-serif")
     .style("font-size", "10px")
     .style("fill", "#fff");
-  bubble.append("path")
+    bubble.append("text")
+    .attr("id","b2-text")
+    .style("font-family", "sans-serif")
+    .style("font-size", "10px")
+    .style("fill", "#fff");
+      bubble.append("path") // add the little pointer from the text balloon to the blip
     .attr("d", "M 0,0 10,0 5,8 z")
     .style("fill", "#333");
 }
 
 // this function shows the text balloon with contents and determines its size
-// here we can content to the text balloon, such as rationale, logo, description, 
+// here we can add content to the text balloon, such as rationale, logo, description, 
 const showBubble = function (d) {
   if (d.active || configuration.print_layout) {
     var tooltip = d3.select("#bubble text")
-      .text(d.label);
+      .text(d.label)
+      ;
     var bbox = tooltip.node().getBBox();
     d3.select("#bubble")
       .attr("transform", translate(d.x - bbox.width / 2, d.y - 16))
@@ -440,7 +370,7 @@ function drawRings(rings, grid, config) {
   }
 }
 
-function drawRadar(radar, config) {
+function drawRadarGrid(radar, config) {
   var grid = radar.append("g");
 
   // draw grid lines
@@ -498,4 +428,103 @@ const getCircleRadiusForBlip = function (entry) {
     radius = radius * entry.importance
   }
   return radius
+}
+
+
+const drawBlips = function (config, rink, segmented) {
+  var blips = rink.selectAll(".blip")
+    .data(config.entries)
+    .enter()
+    .append("g")
+    .attr("class", "blip")
+    .attr("transform", function (d, i) { return legend_transform(d.quadrant, d.ring, segmented, i); })
+    .on("mouseover", function (d) { showBubble(d); highlightLegendItem(d); })
+    .on("mouseout", function (d) { hideBubble(d); unhighlightLegendItem(d); });
+
+  // configure each blip
+  blips.each(function (d) {
+    var blip = d3.select(this);
+
+    // blip link
+    if (!config.print_layout && d.active && d.hasOwnProperty("link")) {
+      blip = blip.append("a")
+        .attr("xlink:href", d.link);
+    }
+
+    // here the shape to be drawn is determined, including its size
+    // todo: stop sign for entries no longer used?
+    // blip shape
+    if (d.moved > 0) {
+      blip.append("path")
+        .attr("d", "M -11,5 11,5 0,-13 z") // triangle pointing up
+        .style("fill", d.color);
+    } else if (d.moved < 0) {
+      blip.append("path")
+        .attr("d", "M -11,-5 11,-5 0,13 z") // triangle pointing down
+        .style("fill", d.color);
+    } else {
+      if (config.show_logos) {
+        if (d.logo) {
+          blip.append('image')
+            .attr('xlink:href', d.logo)
+            .attr('width', 80)
+            .attr('height', 40)
+            .attr("x", "-40")   // if on left side, then move to the left, if on the right side then move to the right
+            .attr("y", "-15")
+        }
+        else { // when no logo is available, print the label instead
+          blip.append("text")
+            .text(d.label)
+            .attr("x", -30)  // if on left side, then move to the left, if on the right side then move to the right
+            .attr("y", -5)  // if on upper side, then move up, if on the down side then move down
+            .attr("text-anchor", "middle")
+            .style("fill", "#000")
+            .style("font-family", "Arial, Helvetica")
+            .style("font-size", function (d) { return d.label.length > 2 ? "15px" : "17px"; })
+            .style("pointer-events", "none")
+            .style("user-select", "none");
+        }
+      }
+      else {
+        blip.append("circle")
+          .attr("r", getCircleRadiusForBlip(d)) // here we can determine the size of the circle - based on the properties of the entry
+          .attr("fill", d.color)
+        //.style("fill", `url(${d.logo})`)
+      }
+    }
+
+    // blip text to be printed inside the shape - currently the randomly assigned sequence number
+    if (d.active || config.print_layout) {
+      var blip_text = config.print_layout ? d.id : d.label.match(/[a-z]/i);
+      blip.append("text")
+        .text(blip_text)
+        .attr("y", 3)
+        .attr("text-anchor", "middle")
+        .style("fill", "#fff")
+        .style("font-family", "Arial, Helvetica")
+        .style("font-size", function (d) { return blip_text.length > 2 ? "8px" : "9px"; })
+        .style("pointer-events", "none")
+        .style("user-select", "none");
+    }
+  });
+  return blips
+}
+
+
+function hideBubble(d) {
+  var bubble = d3.select("#bubble")
+    .attr("transform", translate(0, 0))
+    .style("opacity", 0);
+}
+
+function highlightLegendItem(d) {
+  var legendItem = document.getElementById("legendItem" + d.id);
+  legendItem.setAttribute("filter", "url(#solid)");
+  legendItem.setAttribute("fill", "white");
+}
+
+function unhighlightLegendItem(d) {
+  var legendItem = document.getElementById("legendItem" + d.id);
+  legendItem.removeAttribute("filter");
+  legendItem.removeAttribute("fill");
 }
