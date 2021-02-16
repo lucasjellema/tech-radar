@@ -67,18 +67,28 @@ const drawBlips = function (config, rink, segmented, the_legend_offset) {
           .attr("x", "-40")   // if on left side, then move to the left, if on the right side then move to the right
           .attr("y", "-15")
       }
+      // svg text properties: https://vanseodesign.com/web-design/svg-text-font-properties/ 
     else if (config.blip_displayStyle == "text" || (!d.logo && config.blip_displayStyle == "logos" ) ) {  
         blip.append("text")
           .text(d.label)
-          .attr("x", -30)  // if on left side, then move to the left, if on the right side then move to the right
+          .attr("x", 0)  // if on left side, then move to the left, if on the right side then move to the right
           .attr("y", -5)  // if on upper side, then move up, if on the down side then move down
           .attr("text-anchor", "middle")
-          .style("fill", "#000")
+          .attr("alignment-baseline", "before-edge")
+          .style("fill", "#000") // TODO consider different color
           .style("font-family", "Arial, Helvetica")
+          .style("font-stretch","extra-condensed")
           .style("font-size", function (d) { return d.label.length > 2 ? "15px" : "17px"; })
-          .style("pointer-events", "none")
           .style("user-select", "none")
-      }
+// TODO if the label > 10 characters, thenm break at space and write second line
+        //   blip.append("text")
+        //   .text(d.label)
+        //   .attr("text-anchor", "middle")
+        //   .attr("alignment-baseline", "before-edge")
+        //   .attr("x", 0)  // if on left side, then move to the left, if on the right side then move to the right
+        //   .attr("y", 15)  // if on upper side, then move up, if on the down side then move down
+
+        }
     
     else { // blip_displayStyle == "shapes" is assumed here
       // here the shape to be drawn is determined, including its size
