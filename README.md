@@ -29,27 +29,44 @@ Each entry represents both:
 For both angles, there are several properties identified for each entry:
 
 ## Objective properties
-* name/label
-* description
-* logo
-* homepage
-* vendor /sponsor
-* birthyear / year of first occurrence
-* timestamp of last major release
-* category (for example concept, technique/process, tool, platform & infra, language, framework/library - something that becomes part of custom software)
-* licenseModel (oss, commercial)
-* tags (more descriptors that characterize the entry - for example: database, nosql, managed, saas, container, security )
 
-## Context sensitive properties 
-* who
-* when
-* scope (personal, department, company, ecosystem, world)
-* community sentiment (market share, GitHub stars, stackoverflow activity, appetite, ...)
-* analyst rating
-* current status (where are we now? )
-* ambition/ desired status (for example: wait, investigate, learn, apply (full force), retire/reduce, do not use anymore)
-* size/relevance/scale 
-* rationale/motivation (explanation of the the subjective ratings)
+| Property  | Description  | Values  | Notes  |   
+|---|---|---|---|
+| datestamp  | Date on which the entry was concluded  | 2021, 2021-01, 2021-01-31  |   |   
+| reporter  | Person responsible for the entry  |   |   |   
+| label  | Display label for Tool/Technology/Concept/...  |   |   |
+| description  | description  |   |   |   
+| logo  | URL to image or base64 representation of image  | https://w7.png.com/png-oracle-db.png , data:image/png;base64,iVBOR...II="  |   |   
+| homepage  | Link to (most relevant) website for this entry  | https://www.postgresql.org/  |   |   
+| vendor  | Name of primary organization or company that owns, sponsors, coordinates the item  | Red Hat, Oracle, Microsoft, Apache, CNCF, AWS, IBM, Google  |   |   
+| initialReleaseDate  | Year or date of first relevant presence  | 1982, 1982-05, 2019-09-15  |   |   
+| lastMajorUpdateDate  | Year or date of the most recent major update or release  |  2020, 2020-12, 2021-01-15  |   |   
+| updateLabel  | Label for most recent major update - version, project name,   | 21c, macOS Big Sur (11.2.1), Windows 10 Build 20H2   |   |   
+| category  | Category, Classification or Type  | concept, tool, framework, library, platform, infra, language, technique  |   |   
+| licenseModel  | How is this item offered?  | oss, commercial, subscription, n/a    | Open Source/Public Domain, commercial license, usage based subscription (also commercial), not applicable (for example for concepts and trends)   |   
+| tags  | keywords or qualifiers that provide additional guidance  | data, cloud, security, container  |   |   
+| granularity  | level of detail and specificity  | 0, 1, 2  | 0 - high over, abstract, for example Azure, HashiCorp, .NET, Data Lake, DevOps, automated testing; 1 - large, tangible for example Oracle Database, Apache Kafka, Azure Data Lake (Gen2),Visual Studio Code;2 - detail, specific, feature within platform service within public cloud; for example A/B Testing, Java Servlets, Istio, Azure Logic Apps Connector for SalesForce    |   
+|   |   |   |   |   
+
+## Context Sensitive properties and Subjective Assessments 
+
+| Property  | Description  | Values  | Notes  |   
+|---|---|---|---|
+| communityRating  | (our assessment of the) community sentiment, adoption and momentum  | 0,1,2,3  | derived from market share, GitHub stars, stackoverflow activity, appetite; perhaps distinguish between momentum/enthusiasm (future) and actual marketshare/usage (present); 3 = highest, 2 = medium, 1 = starting/limited/dwindling, 0 = embryonic |   
+| hypeCycleStatus  | (our assessment of the) Status in terms of the Hype Cycle  | 0,1,2,3,4 | 0 = innovationTrigger, 1 = peakOfInflatedExpectations, 2= throughOfDisillusionment, 3 = slopeOfElightenment, 4 = plateauOfProductivity      |   
+| marketAdoptionStatus  | (our assessment of the) Status in terms of market adoption/penetration  |0,1,2,3,4 | 0 = innovator, 1 = earlyAdoptor, 2= earlyMajority, 3 = lateMajority, 4 = laggard     |   
+| scope  | What is the scope of the information below; who are the *we* that is referred to  | AMIS, Conclusion, the AMIS Integration Practice, Ursula Panini  |  this can be a an ecosystem, company, virtual team or guild, a department or an individual |   
+| introductionDate  | Date when this entry first appeared on our radar  | 2016, 2016-4 |   |   
+| relevance  | Indication of how important this entry is for us (our customers, our colleagues, our strategy)  | 0, 1, 2, 3  | 0 = hardly relevant, 1= limited relevance/maybe some potential, 2 = quite relevant, should have , 3 = crucial, must have |   
+| magnitude  | Indication of size of entry in our organization |  0, 1, 2, 3 | 0 = niche (< 5 % ), 1 = occasionally, some people, 2 = many people, very often, 3 = virtually everyone and/or very frequently or almost all the time - based on number or % of people that is involved with this entry and the frequency and duration of their involvement  |    
+| growthShareStatus  | Status according to BCG Growth Market Share Matrix given our organization and our customers & strategy | star, dog, questionMark, cashcow  | *dog* = low marketshare/activity, low growth (little to be gained), *star* = substantial current activity (or foundation to launch activity from), high growth/potential (so worth investing), *cash cow* = low growth, substantial marketshare/activity/revenue (no high investments, milk it ); *question mark* = high market growth, low current activity and no easy entrance  |   
+| rationale  | explanation of the the subjective ratings - how did we arrive at our assessment  |   |   |   
+| currentStatus  | What is (until) today the status of this entry for us?  | 0,1,2,3,4,5  | 0 = nothing done yet/interested, 1 = exploring/explored, 2=trying out (prototype/PoC), 3 = (ready for) applying/applied for real, 4=retiring/deprecated, 5=not interested (now/anymore)  | 
+| ambition  | What is our ambition/where do we want to go from today onwards  | 0,1,2,3,4,5  | Based on the above assessments, what is our intention with this entry? 0 = nothing yet (Hold), 1 = assess/explore, learn, play; 2=start a trial, do a prototype/PoC, 3 = apply - no restrictions or holding back; push it enthusiastically, 4=deprecate - no further investments, do not use in new environments; continued use where already in place, 5 = RIP/ stop using ; not interested (now/anymore)  | 
+|   |   |   |   |   
+
+* scope (personal, department, company)
+
 
 # Radar elements
 
