@@ -1,4 +1,5 @@
 export {config}
+import {getEntriesFilteredByTags} from './viewpoint_helpers.js'
 
 let config = {
     svg_id: "radar",
@@ -24,9 +25,13 @@ let config = {
       { name: "ASSESS", color: "#fbdb84" },
       { name: "HOLD", color: "#efafa9" }
     ],
-    show_logos: false
+    show_logos: false,
+    blip_displayStyle:"shapes"
+    ,all_tags: false
     , print_layout: true,
     // zoomed_quadrant: 0,
     //ENTRIES
-    entries: radarEntries
+    entries: radarEntries,
+    getEntries: (noFilter) => { return (noFilter? radarEntries: getEntriesFilteredByTags()) }
   }
+// // entry.tags && entry.tags.includes('data')) // example filter - only show entries with a data tag

@@ -4,16 +4,34 @@
   <meta http-equiv="Content-type" content="text/html; charset=utf-8">
   <title>AMIS | Conclusion Tech Radar</title>
   <link rel="shortcut icon" href="https://res.conclusion.nl/inc/img/favicon.gif">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <script>let plotRadar
     let currentConfiguration = 0 // currently selected viewpoint
     const configurations = [] // store for the configurations for the viewpoints
     const refreshRadar = function () {
-      plotRadar(configurations[currentConfiguration]);
+      plotRadar(getCurrentConfiguration());
+    }
+  </script>
+  <script type="module">
+    // load the configurations for all viewpoints
+    import { config as traditionalRadarConfig } from './modules/traditional_radar.js';
+    configurations.push(traditionalRadarConfig)
+    import { config as bcgmatrixRadarConfig } from './modules/bcgmatrix_radar.js';
+    configurations.push(bcgmatrixRadarConfig)
+
+
+  </script>
+  <script>
+    const getCurrentConfiguration = function () {
+      return configurations[currentConfiguration]
     }
   </script>
   <script type="module">
     import { radar_visualization } from './radar.js';
     plotRadar = radar_visualization  // imports from a module can only be done from within a module; however, we cannot import/export between inline modules such as this one; hence the use of plotRadar as a DIY form of exporting the imported function
+
+
+
   </script>
   <script src="https://d3js.org/d3.v4.min.js"></script>
   <script src="entries.js"></script>
@@ -32,34 +50,59 @@
         <td>
           <div class="dropdown">
             <button class="dropbtn">Radar Viewpoints</button>
-            <div class="dropdown-content">
-              <a href="#" onclick="handlePickViewpoint(0)">Traditional</a>
-              <a href="#" onclick="handlePickViewpoint(1)">BCG Matrix</a>
+            <div id="viewpoint-selection" class="dropdown-content">
             </div>
           </div>
         </td>
       </tr>
       <tr>
-        <td>Show Logos</td>
+        <td>Display Style Blips</td>
+        <td>
+          <label class="radio-inline">
+            <input type="radio" name="blip-displaystyle-optradio" value="shapes" onchange="handleBlipDisplayStyleChange()" checked>Shapes
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="blip-displaystyle-optradio" value="logos" onchange="handleBlipDisplayStyleChange()">Logos
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="blip-displaystyle-optradio" value="text" onchange="handleBlipDisplayStyleChange()">Text
+          </label>
+        </td>
+      </tr>
+      <tr>
+        <td>Filter Labels
+        </td>
+        <td>
+          <div id="myBtnContainer">
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>Need All Tags? (or one or more)</td>
         <td>
           <label class="switch">
-            <input id="show_logos" type="checkbox" onchange="handleShowLogosToggle()">
+            <input id="all_tags" type="checkbox" onchange="handleAllTagsToggle()">
             <span class="slider round"></span>
           </label>
         </td>
       </tr>
+
     </table>
+  </div>
+  <div id="myModal" class="modal">
+    <!-- Modal content to present details for the radar entries or blips -->
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Item</h2>
+      <h3>Label</h3><span id="modal_label"></span>
+      <img id="modal_logo" height="100px" />
+    </div>
   </div>
 
   <div id="svgContainer">
     <svg id="radar"></svg>
   </div>
   <script type="module">
-    // load the configurations for all viewpoints
-    import { config as traditionalRadarConfig } from './modules/traditional_radar.js';
-    configurations.push(traditionalRadarConfig)
-    import { config as bcgmatrixRadarConfig } from './modules/bcgmatrix_radar.js';
-    configurations.push(bcgmatrixRadarConfig)
     // initial display of the default radar
     refreshRadar()
   </script>
@@ -97,7 +140,6 @@
       <td>
     </tr>
   </table>
-
 
 </body>
 
