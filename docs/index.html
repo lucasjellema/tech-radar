@@ -91,12 +91,15 @@
         </td>
       </tr>
       <tr>
-        <td>Upload Entries
+        <td>Upload and Merge Additional Entries
           <input type="file" id="fileElem" multiple accept="application/json,text/*" style="display:none">
           <button id="fileSelect">Select file(s)</button>
           <div id="fileList">
             <p>No files selected!</p>
           </div>
+        </td>
+        <td>Download Current Entry Selection
+          <a href="#" onclick="downloadEntriesCurrentViewpointFilter()">Click to Download</a>
         </td>
       </tr>
     </table>
