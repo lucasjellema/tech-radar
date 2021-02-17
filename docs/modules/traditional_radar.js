@@ -32,4 +32,8 @@ let config = {
   //ENTRIES
   entries: radarEntries,
   getEntries: (noFilter) => { return (noFilter? radarEntries: getEntriesFilteredByTags()) }
+  , getRing: (entry) => {return entry.ring?entry.ring:3}
+  ,  getQuadrant : (entry) => { return entry.quadrant?entry.quadrant:1}
+
+
 }

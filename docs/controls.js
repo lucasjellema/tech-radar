@@ -10,10 +10,10 @@ const handleCollapsible = function (button) {
 }
 
 const handleBlipDisplayStyleChange = function () {
-    
+
     const radiosDisplayStyle = Array.from(document.getElementsByName("blip-displaystyle-optradio"))
     // find out which radio is checked
-    const displayStyle = radiosDisplayStyle.filter( (radio) => radio.checked)[0].value
+    const displayStyle = radiosDisplayStyle.filter((radio) => radio.checked)[0].value
     getCurrentConfiguration().blip_displayStyle = displayStyle
     refreshRadar()
 }
@@ -115,7 +115,52 @@ const createFiltersForTags = function (container, entries) {
     })
 }
 
+// inspiration at https://developer.mozilla.org/en-US/docs/Web/API/File/Using_files_from_web_applications
+const initializeFileUpload = function () {
+    const fileSelect = document.getElementById("fileSelect"),
+        fileElem = document.getElementById("fileElem");
+
+    fileSelect.addEventListener("click", function (e) {
+        if (fileElem) {
+            fileElem.click();
+        }
+    }, false);
+
+    fileElem.addEventListener("change", handleFiles, false);
+}
+
+async function  handleFiles() {
+    if (!this.files.length) {
+        fileList.innerHTML = "<p>No files selected!</p>";
+    } else {
+        fileList.innerHTML = "";
+        const list = document.createElement("ul");
+        fileList.appendChild(list);
+        for (let i = 0; i < this.files.length; i++) {
+            const li = document.createElement("li");
+            list.appendChild(li);
+
+            const info = document.createElement("span");
+            info.innerHTML = this.files[i].name + ": " + this.files[i].size + " bytes";
+            li.appendChild(info);
+            const contents = await this.files[i].text()
+            // the contents of the file should be a JSON array that can be evaluated into a collection of radar entries
+            const newEntries = JSON.parse(contents)
+            // naively concat the existing entries with these new ones
+            // TODO: duplicate elements in resulting array should be resolved; the newest entry "wins"
+            radarEntries = radarEntries.concat(newEntries)            
+
+        }
+        refreshRadar()
+    }
+}
+
+
+
 const initializeControls = function (config) {
+
+    initializeFileUpload()
+
     var btnContainer = document.getElementById("myBtnContainer");
     createFiltersForTags(btnContainer, config.getEntries())
     var btns = btnContainer.getElementsByClassName("btn");
@@ -131,6 +176,8 @@ const initializeControls = function (config) {
 
     // viewPoint selection
     var viewpointSelectionContainer = document.getElementById("viewpoint-selection");
+    removeAllChildNodes(viewpointSelectionContainer)
+    
     //<a href="#" onclick="handlePickViewpoint(0)">Traditional</a>
     configurations.forEach((config, index) => {
         const link = document.createElement("a")

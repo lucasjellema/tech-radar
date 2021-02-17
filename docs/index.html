@@ -6,6 +6,7 @@
   <link rel="shortcut icon" href="https://res.conclusion.nl/inc/img/favicon.gif">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <script>let plotRadar
+    let radarEntries = []
     let currentConfiguration = 0 // currently selected viewpoint
     const configurations = [] // store for the configurations for the viewpoints
     const refreshRadar = function () {
@@ -59,13 +60,16 @@
         <td>Display Style Blips</td>
         <td>
           <label class="radio-inline">
-            <input type="radio" name="blip-displaystyle-optradio" value="shapes" onchange="handleBlipDisplayStyleChange()" checked>Shapes
+            <input type="radio" name="blip-displaystyle-optradio" value="shapes"
+              onchange="handleBlipDisplayStyleChange()" checked>Shapes
           </label>
           <label class="radio-inline">
-            <input type="radio" name="blip-displaystyle-optradio" value="logos" onchange="handleBlipDisplayStyleChange()">Logos
+            <input type="radio" name="blip-displaystyle-optradio" value="logos"
+              onchange="handleBlipDisplayStyleChange()">Logos
           </label>
           <label class="radio-inline">
-            <input type="radio" name="blip-displaystyle-optradio" value="text" onchange="handleBlipDisplayStyleChange()">Text
+            <input type="radio" name="blip-displaystyle-optradio" value="text"
+              onchange="handleBlipDisplayStyleChange()">Text
           </label>
         </td>
       </tr>
@@ -86,7 +90,15 @@
           </label>
         </td>
       </tr>
-
+      <tr>
+        <td>Upload Entries
+          <input type="file" id="fileElem" multiple accept="application/json,text/*" style="display:none">
+          <button id="fileSelect">Select file(s)</button>
+          <div id="fileList">
+            <p>No files selected!</p>
+          </div>
+        </td>
+      </tr>
     </table>
   </div>
   <div id="myModal" class="modal">

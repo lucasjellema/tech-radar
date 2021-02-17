@@ -32,7 +32,7 @@ For both angles, there are several properties identified for each entry:
 
 | Property  | Description  | Values  | Notes  |   
 |---|---|---|---|
-| datestamp  | Date on which the entry was concluded  | 2021, 2021-01, 2021-01-31  |   |   
+| datestamp  | Date on which the entry was completed  | 2021, 2021-01, 2021-01-31  |   |   
 | reporter  | Person responsible for the entry  |   |   |   
 | label  | Display label for Tool/Technology/Concept/...  |   |   |
 | description  | description  |   |   |   
@@ -41,7 +41,7 @@ For both angles, there are several properties identified for each entry:
 | vendor  | Name of primary organization or company that owns, sponsors, coordinates the item  | Red Hat, Oracle, Microsoft, Apache, CNCF, AWS, IBM, Google  |   |   
 | initialReleaseDate  | Year or date of first relevant presence  | 1982, 1982-05, 2019-09-15  |   |   
 | lastMajorUpdateDate  | Year or date of the most recent major update or release  |  2020, 2020-12, 2021-01-15  |   |   
-| updateLabel  | Label for most recent major update - version, project name,   | 21c, macOS Big Sur (11.2.1), Windows 10 Build 20H2   |   |   
+| lastMajorUpdateLabel  | Label for most recent major update - version, project name,   | 21c, macOS Big Sur (11.2.1), Windows 10 Build 20H2   |   |   
 | category  | Category, Classification or Type  | concept, tool, framework, library, platform, infra, language, technique  |   |   
 | licenseModel  | How is this item offered?  | oss, commercial, subscription, n/a    | Open Source/Public Domain, commercial license, usage based subscription (also commercial), not applicable (for example for concepts and trends)   |   
 | tags  | keywords or qualifiers that provide additional guidance  | data, cloud, security, container  |   |   

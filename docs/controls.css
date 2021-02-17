@@ -85,7 +85,7 @@
 .content {
   padding: 0 8px;
   display: none;
-  height:250px; // height of configuration panel
+  height:320px; // height of configuration panel
   overflow: hidden;
   background-color: #f1f1f1;
 }

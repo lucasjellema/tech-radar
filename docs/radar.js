@@ -21,7 +21,7 @@
 // THE SOFTWARE.
 
 export { radar_visualization }
-import {drawBlips, translate,showBubble, hideBubble} from './modules/radar_blips.js'
+import { drawBlips, translate, showBubble, hideBubble } from './modules/radar_blips.js'
 // radial_min / radial_max are multiples of PI
 const quadrants = [
   { radial_min: 0, radial_max: 0.5, factor_x: 1, factor_y: 1 },
@@ -48,6 +48,14 @@ const legend_offset = [
   { x: -675, y: 90 },
   { x: -675, y: -310 },
   { x: 450, y: -310 }
+];
+
+// where to position the images representing the quadrants (if they are there)
+const legend_image_offset = [
+  { x: 280, y: 300 },
+  { x: -400, y: 300 },
+  { x: -400, y: -400 },
+  { x: 280, y: -400 }
 ];
 
 let configuration;
@@ -149,12 +157,12 @@ function radar_visualization(config) {
   // position each entry randomly in its segment
   for (var i = 0; i < config.getEntries().length; i++) {
     var entry = config.getEntries()[i];
-    entry.segment = segment(entry.quadrant, entry.ring);
+    entry.segment = segment(config.getQuadrant(entry), config.getRing(entry));
     var point = entry.segment.random();
     entry.x = point.x;
     entry.y = point.y;
     entry.color = entry.active || config.print_layout ?
-      config.rings[entry.ring].color : config.colors.inactive;
+      config.rings[config.getRing(entry)].color : config.colors.inactive;
   }
 
   // partition entries according to segments
@@ -167,7 +175,7 @@ function radar_visualization(config) {
   }
   for (var i = 0; i < config.getEntries().length; i++) {
     var entry = config.getEntries()[i];
-    segmented[entry.quadrant][entry.ring].push(entry);
+    segmented[config.getQuadrant(entry)][config.getRing(entry)].push(entry);
   }
 
   // assign unique sequential id to each entry
@@ -215,7 +223,7 @@ function radar_visualization(config) {
   var grid = drawRadarGrid(radar, config);
   drawRings(rings, grid, config);
   if (config.print_layout) {
-    drawLegend(radar, translate, title_offset, config, footer_offset, quadrant, legend_offset, ring, segmented, showBubble, highlightLegendItem, hideBubble, unhighlightLegendItem);
+    drawLegend(radar, translate, title_offset, config, footer_offset, legend_offset, ring, segmented, showBubble, highlightLegendItem, hideBubble, unhighlightLegendItem);
   }
 
   // layer for entries
@@ -272,7 +280,7 @@ function initializeTextBalloon(radar) {
     .style("fill", "#333");
 }
 
-function drawLegend(radar, translate, title_offset, config, footer_offset, quadrant, legend_offset, ring, segmented, showBubble, highlightLegendItem, hideBubble, unhighlightLegendItem) {
+function drawLegend(radar, translate, title_offset, config, footer_offset, legend_offset, ring, segmented, showBubble, highlightLegendItem, hideBubble, unhighlightLegendItem) {
   radar.append("text")
     .attr("transform", translate(title_offset.x, title_offset.y))
     .text(config.title)
@@ -298,6 +306,17 @@ function drawLegend(radar, translate, title_offset, config, footer_offset, quadr
       .text(config.quadrants[quadrant].name)
       .style("font-family", "Arial, Helvetica")
       .style("font-size", "18px");
+    if (config.quadrants[quadrant].image) { // if there is an image associated with the quadrant, display it
+      legend.
+        append('image')
+        .attr('xlink:href', config.quadrants[quadrant].image)
+        .attr('width', 100)
+        .attr("transform", translate(
+          legend_image_offset[quadrant].x,
+          legend_image_offset[quadrant].y 
+        ))
+          }
+
     for (var ring = 0; ring < 4; ring++) {
       legend.append("text")
         .attr("transform", legend_transform(quadrant, ring, segmented))

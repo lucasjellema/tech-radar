@@ -1,4 +1,4 @@
-let radarEntries = [
+let entries = [
   {
     quadrant: 3,
     ring: 3,
@@ -24,10 +24,30 @@ let radarEntries = [
     ring: 1,
     label: "PostgreSQL",
     active: false,
-    link: "https://engineering.zalando.com/tags/postgresql.html",
-    moved: 0
-    , tags: ['data', 'database', 'sql', 'rdbms', 'open source']
+    initialReleaseDate: "1996-07",
+    lastMajorUpdateDate: "2021-02",
+    lastMajorUpdateLabel: "13.2",
+    category: "platform",
+    licenseModel: "oss",
+    homepage: "https://www.postgresql.org/",
+    description: `PostgreSQL also known as Postgres, is a free and open-source relational database management system (RDBMS) emphasizing extensibility and SQL compliance. It was originally named POSTGRES, referring to its origins as a successor to the Ingres database developed at the University of California, Berkeley.[13][14] In 1996, the project was renamed to PostgreSQL to reflect its support for SQL. After a review in 2007, the development team decided to keep the name PostgreSQL and the alias Postgres.[15]
+    PostgreSQL features transactions with Atomicity, Consistency, Isolation, Durability (ACID) properties, automatically updatable views, materialized views, triggers, foreign keys, and stored procedures.[16] It is designed to handle a range of workloads, from single machines to data warehouses or Web services with many concurrent users. It is the default database for macOS Server[17][18][19] and is also available for Windows, Linux, FreeBSD, and OpenBSD.`
+    , vendor: "PostgreSQL Global Development Group"
+    , moved: 0
+    , tags: ['data', 'database', 'sql', 'rdbms', 'open source', 'acid']
     , logo: "https://w7.pngwing.com/pngs/559/367/png-transparent-postgresql-object-relational-database-oracle-database-freebsd-icon-text-logo-head.png"
+    , granularity: 1
+    , communityRating : 3
+    , hypeCycleStatus : 4
+    , marketAdoptionStatus: 4
+    , scope : "AMIS"
+    , introductionDate : "2018"
+    , relevance: 2
+    , magnitude: 1
+    , growthShareStatus: "cash cow"
+    , rationale : "PostgreSQL is a good alternative in situations where we like a relational database that can be accessed through SQL and that supports ACID transactions. PostgreSQL is available as a managed service on Azure - which is sometimes relevant."
+    , currentStatus: 3
+    , ambition: 3 
   },
   {
     quadrant: 3,
@@ -109,3 +129,4 @@ let radarEntries = [
     , logo: "https://logodownload.org/wp-content/uploads/2019/10/python-logo-2.png"
   },
 ]
+radarEntries = radarEntries.concat(entries)
