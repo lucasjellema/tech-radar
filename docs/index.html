@@ -307,7 +307,9 @@
             <tr>
               <td class="labelColumn">
                 <h5 class="modalTooltip">Current Status
-                  <span class="modalTooltiptext">What is (until) today the status of this entry for us? 0 = nothing done yet/interested, 1 = exploring/explored, 2=trying out (prototype/PoC), 3 = (ready for) applying/applied for real, 4=retiring/deprecated, 5=not interested (now/anymore)</span>
+                  <span class="modalTooltiptext">What is (until) today the status of this entry for us? 0 = nothing done
+                    yet/interested, 1 = exploring/explored, 2=trying out (prototype/PoC), 3 = (ready for)
+                    applying/applied for real, 4=retiring/deprecated, 5=not interested (now/anymore)</span>
                 </h5>
               </td>
               <td> <span id="entryCurrentStatus"></span>
@@ -341,6 +343,7 @@
     </div>
 
   </div>
+
   <div id="myModalEditor" class="modal" style="display:none">
     <!-- Modal content to edit the details for the radar entries or blips -->
     <div class="modal-content">
@@ -370,7 +373,7 @@
                 </h5>
               </td>
               <td>
-                <input type="text" placeholder="Label" name="logo" id="editEntryLogo" class="input-field" >
+                <input type="text" placeholder="Label" name="logo" id="editEntryLogo" class="input-field">
               </td>
             </tr>
 
@@ -381,7 +384,7 @@
                 </h5>
               </td>
               <td>
-                <input type="text" placeholder="Name or Label" name="name" id="editEntryLabel" class="input-field" >
+                <input type="text" placeholder="Name or Label" name="name" id="editEntryLabel" class="input-field">
               </td>
             </tr>
             <tr>
@@ -391,8 +394,8 @@
                 </h5>
               </td>
               <td>
-                
-                <input type="text" placeholder="Category" name="category" id="editEntryCategory" class="input-field" >
+
+                <input type="text" placeholder="Category" name="category" id="editEntryCategory" class="input-field">
               </td>
             </tr>
             <tr>
@@ -402,7 +405,8 @@
                 </h5>
               </td>
               <td>
-                <span id="entryTags"></span>
+                <input type="text" placeholder="" name="entryTags" id="editEntryTags" class="input-field">
+
               </td>
             </tr>
             <tr>
@@ -414,7 +418,9 @@
                 </h5>
               </td>
               <td>
-                <span id="entryVendor"></span>
+                <input type="text" placeholder="CNCF, IBM, Microsoft, Mendix, Oracle" name="entryVendor"
+                  id="editEntryVendor" class="input-field">
+
               </td>
             </tr>
             <tr>
@@ -424,7 +430,8 @@
                 </h5>
               </td>
               <td>
-                <span id="entryInitialReleaseDate"></span>
+                <input type="text" placeholder="2021, 2021-2" name="entryInitialReleaseDate"
+                  id="editEntryInitialReleaseDate" class="input-field">
               </td>
             </tr>
 
@@ -435,7 +442,10 @@
                 </h5>
               </td>
               <td>
-                <span id="entryLastMajorUpdateDate"></span>
+                <input type="text" placeholder="" name="entryLastMajorUpdateDate" id="editEntryLastMajorUpdateDate"
+                  class="input-field">
+
+
               </td>
             </tr>
 
@@ -446,7 +456,8 @@
                 </h5>
               </td>
               <td>
-                <span id="entryLastMajorUpdateLabel"></span>
+                <input type="text" placeholder="Current Version Label" name="entryLastMajorUpdateLabel"
+                  id="editEntryLastMajorUpdateLabel" class="input-field">
               </td>
             </tr>
 
@@ -457,7 +468,9 @@
                 </h5>
               </td>
               <td>
-                <span id="entryDescription"></span>
+                <textarea name="entryDescription" id="editEntryDescription" rows="8" cols="80"></textarea>
+
+
               </td>
             </tr>
 
@@ -469,7 +482,8 @@
                 </h5>
               </td>
               <td>
-                <span id="entryLicenseModel"></span>
+                <input type="text" placeholder="License Model" name="entryLicenseModel" id="editEntryLicenseModel"
+                  class="input-field">
               </td>
             </tr>
 
@@ -480,7 +494,7 @@
                 </h5>
               </td>
               <td>
-                <a id="entryHomepage" href="" target="_new"></a>
+                <input type="text" placeholder="Homepage" name="homepage" id="editEntryHomepage" class="input-field">
               </td>
             </tr>
           </table>
@@ -496,7 +510,8 @@
                 </h5>
               </td>
               <td>
-                <span id="entryScope"></span>
+                <input type="text" placeholder="individual, department, company, " name="entryScope" id="editEntryScope"
+                  class="input-field">
               </td>
             </tr>
             <tr>
@@ -505,7 +520,9 @@
                   <span class="modalTooltiptext">Date when this entry first appeared on our radar</span>
                 </h5>
               </td>
-              <td> <span id="entryIntroductionDate"></span>
+              <td>
+                <input type="text" placeholder="2019, 1998-2" name="entryIntroductionDate"
+                  id="editEntryIntroductionDate" class="input-field">
               </td>
             </tr>
             <tr>
@@ -514,7 +531,9 @@
                   <span class="modalTooltiptext">level of detail and specificity</span>
                 </h5>
               </td>
-              <td> <span id="entryGranularity"></span>
+              <td>
+                <input type="text" placeholder="0 - high over, 1 - large, tangible, 2 - detailed"
+                  name="entryGranularity" id="editEntryGranularity" class="input-field">
               </td>
             </tr>
             <tr>
@@ -524,7 +543,9 @@
                     momentum</span>
                 </h5>
               </td>
-              <td> <span id="entryCommunityRating"></span>
+              <td>
+                <input type="text" placeholder="0 (very low) - 3 (very high)" name="entryCommunityRating"
+                  id="editEntryCommunityRating" class="input-field">
               </td>
             </tr>
             <tr>
@@ -534,7 +555,8 @@
                     adoption/penetration</span>
                 </h5>
               </td>
-              <td> <span id="entryMarketAdoptionStatus"></span>
+              <td>
+                <span id="entryMarketAdoptionStatus"></span>
               </td>
             </tr>
             <tr>
@@ -544,17 +566,23 @@
                     colleagues, our strategy)</span>
                 </h5>
               </td>
-              <td> <span id="entryRelevance"></span>
+              <td>
+                <input type="text" placeholder="0 (hardly) - 3 (crucial, must have)" name="entryRelevance"
+                  id="editEntryRelevance" class="input-field">
               </td>
             </tr>
             <tr>
               <td class="labelColumn">
                 <h5 class="modalTooltip">Magnitude
-                  <span class="modalTooltiptext">Indication of size of this entry in our organization; 0 = niche (< 5 % ), 1 = occasionally, some people, 2 = many people, very often, 3 = virtually everyone and/or very frequently or almost all the time - based on number or % of people that is involved with this entry and the frequency and duration of their involvement</span>
+                  <span class="modalTooltiptext">Indication of size of this entry in our organization; 0 = niche (< 5 %
+                      ), 1=occasionally, some people, 2=many people, very often, 3=virtually everyone and/or very
+                      frequently or almost all the time - based on number or % of people that is involved with this
+                      entry and the frequency and duration of their involvement</span>
                 </h5>
               </td>
-              <td> 
-                <input type="text" placeholder="Magnitude Status for Us" name="magnitude" id="editEntryMagnitude" class="input-field" >
+              <td>
+                <input type="text" placeholder="Magnitude Status for Us" name="magnitude" id="editEntryMagnitude"
+                  class="input-field">
 
               </td>
             </tr>
@@ -565,7 +593,9 @@
                     organization and our customers & strategy (star, dog, cash cow, question mark)</span>
                 </h5>
               </td>
-              <td> <span id="entryGrowthShareStatus"></span>
+              <td>
+                <input type="text" placeholder="cash cow, dog, star, question mark - for us"
+                  name="entryGrowthShareStatus" id="editEntryGrowthShareStatus" class="input-field">
               </td>
             </tr>
             <tr>
@@ -574,8 +604,9 @@
                   <span class="modalTooltiptext">What is (until) today the status of this entry for us?</span>
                 </h5>
               </td>
-              <td> 
-                 <input type="text" placeholder="Current Status for Us" name="currentStatus" id="editEntryCurrentStatus" class="input-field" >
+              <td>
+                <input type="text" placeholder="Current Status for Us" name="currentStatus" id="editEntryCurrentStatus"
+                  class="input-field">
               </td>
             </tr>
             <tr>
@@ -584,8 +615,8 @@
                   <span class="modalTooltiptext">What is our ambition/where do we want to go from today onwards</span>
                 </h5>
               </td>
-              <td> 
-                <input type="text" placeholder="Ambition" name="ambition" id="editEntryAmbition" class="input-field" >
+              <td>
+                <input type="text" placeholder="Ambition" name="ambition" id="editEntryAmbition" class="input-field">
               </td>
             </tr>
             <tr>
@@ -595,11 +626,14 @@
                     assessment</span>
                 </h5>
               </td>
-              <td> <span id="entryRationale"></span>
+              <td>
+                <textarea name="entryRationale" id="editEntryRationale" rows="8" cols="80"></textarea>
+
               </td>
             </tr>
 
           </table>
+
         </div>
       </div>
 

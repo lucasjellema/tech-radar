@@ -92,7 +92,7 @@ function writeBlipPropertiesToModal(entry) {
     writeTextInElement("entryScope", entry.scope)
     writeTextInElement("entryIntroductionDate", entry.introductionDate)
     writeTextInElement("entryInitialReleaseDate", entry.initialReleaseDate)
-    writeTextInElement("entryAmbition", `${entry.ambition}: ${ambitionMap[entry.ambition]}` )
+    writeTextInElement("entryAmbition", `${entry.ambition}: ${ambitionMap[entry.ambition]}`)
     writeTextInElement("entryCurrentStatus", `${entry.currentStatus}: ${currentStatusMap[entry.currentStatus]}`)
     writeTextInElement("entryRationale", entry.rationale)
     writeTextInElement("entryGrowthShareStatus", entry.growthShareStatus)
@@ -124,8 +124,24 @@ function writeBlipPropertiesToModalEditor(entry) {
     writeValueInElement("editEntryCurrentStatus", entry.currentStatus)
     writeValueInElement("editEntryAmbition", entry.ambition)
     writeValueInElement("editEntryMagnitude", entry.magnitude)
-    // writeValueInElement("editEntryCategory", entry.category)
-    
+
+    writeValueInElement("editEntryVendor", entry.vendor)
+    writeValueInElement("editEntryInitialReleaseDate", entry.initialReleaseDate)
+    writeValueInElement("editEntryLastMajorUpdateLabel", entry.lastMajorUpdateLabel)
+    writeValueInElement("editEntryHomepage", entry.homepage)
+    writeValueInElement("editEntryLicenseModel", entry.licenseModel)
+    writeValueInElement("editEntryDescription", entry.description)
+    writeValueInElement("editEntryLastMajorUpdateDate", entry.lastMajorUpdateDate)
+    writeValueInElement("editEntryTags", entry.tags)
+    writeValueInElement("editEntryCommunityRating", entry.communityRating)
+    writeValueInElement("editEntryGranularity", entry.granularity)
+    writeValueInElement("editEntryGrowthShareStatus", entry.growthShareStatus)
+    writeValueInElement("editEntryRationale", entry.rationale)
+    // writeValueInElement("editEntry", entry.)
+    // writeValueInElement("editEntry", entry.)
+    // writeValueInElement("editEntry", entry.)
+
+
 }
 
 const handleEdit = function () {
@@ -151,8 +167,8 @@ const handleEdit = function () {
     }
 
     const title = document.getElementById("modalEditorTitle");
-    title.innerText= `Edit details for ${currentEntry.label}`
-    
+    title.innerText = `Edit details for ${currentEntry.label}`
+
     // now populate the controls in the editor with the appropriate values
     writeBlipPropertiesToModalEditor(currentEntry)
     const logo = document.getElementById("edit_modal_logo");
@@ -174,13 +190,25 @@ const handleSave = function () {
     const myModalEditor = document.getElementById("myModalEditor");
     myModalEditor.style.display = "none";
     // read details from input fields in myModalEditor and transfer to current entry
-    currentEntry.label =  getValueInElement("editEntryLabel")
-    currentEntry.logo =  getValueInElement("editEntryLogo")
-    currentEntry.category =  getValueInElement("editEntryCategory")
-    currentEntry.currentStatus =  getValueInElement("editEntryCurrentStatus")
-    currentEntry.ambition =  getValueInElement("editEntryAmbition")
-    currentEntry.magnitude =  getValueInElement("editEntryMagnitude")
-    
+    currentEntry.label = getValueInElement("editEntryLabel")
+    currentEntry.logo = getValueInElement("editEntryLogo")
+    currentEntry.category = getValueInElement("editEntryCategory")
+    currentEntry.currentStatus = getValueInElement("editEntryCurrentStatus")
+    currentEntry.ambition = getValueInElement("editEntryAmbition")
+    currentEntry.magnitude = getValueInElement("editEntryMagnitude")
+    currentEntry.vendor = getValueInElement("editEntryVendor")
+    currentEntry.initialReleaseDate = getValueInElement("editEntryInitialReleaseDate")
+    currentEntry.lastMajorUpdateLabel = getValueInElement("editEntryLastMajorUpdateLabel")
+    currentEntry.homepage = getValueInElement("editEntryHomepage")
+    currentEntry.licenseModel = getValueInElement("editEntryLicenseModel")
+    currentEntry.description = getValueInElement("editEntryDescription")
+    currentEntry.lastMajorUpdateDate = getValueInElement("editEntryLastMajorUpdateDate")
+    currentEntry.tags = getValueInElement("editEntryTags")
+    currentEntry.communityRating = getValueInElement("editEntryCommunityRating")
+    currentEntry.granularity = getValueInElement("editEntryGranularity")
+    currentEntry.growthShareStatus = getValueInElement("editEntryGrowthShareStatus")
+    currentEntry.rationale = getValueInElement("editEntryRationale")
+
     writeBlipPropertiesToModal(currentEntry)
     refreshRadar()
 }
@@ -192,6 +220,14 @@ const handleCancelEdit = function () {
     // show myModal
     const myModal = document.getElementById("myModal");
     myModal.style.display = "block";
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+        if (event.target == myModal) {
+            myModal.style.display = "none";
+        }
+    }
+
 }
 
 /********************   Labels Filter */
