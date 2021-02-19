@@ -33,8 +33,16 @@ let config = {
   //ENTRIES
   entries: radarEntries,
   getEntries: (noFilter) => { return (noFilter ? radarEntries : getEntriesFilteredByTags()) }
-  , getRing: (entry) => { return entry.magnitude ? entry.magnitude : (entry.ring ? entry.ring : 3) }
+  , getRing: (entry) => {
+    const magnitudeRingMap = { 0: 3, 1: 2, 2: 1, 3: 0 }
+    const r = magnitudeRingMap[entry.magnitude]
+    return (r != null) ? r : (entry.ring ? entry.ring : 3)
+}
   , getQuadrant: (entry) => { return entry.growthShareStatus ? growthShareStatusQuadrantMap[entry.growthShareStatus] : (entry.quadrant ? entry.quadrant : 1) }
+  , getSize: (entry) => {
+    return (entry !=null && entry.magnitude!=null)? entry.magnitude : 1
+}
+
 }
 // // entry.tags && entry.tags.includes('data')) // example filter - only show entries with a data tag
 

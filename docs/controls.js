@@ -31,14 +31,16 @@ const handlePickViewpoint = function (viewpointIndex) {
     currentConfiguration = viewpointIndex
     refreshRadar();
 }
+let currentEntry
 
 const showModal = function (entry) {
+    currentEntry = entry
     // Get the modal
     var modal = document.getElementById("myModal");
     modal.style.display = "block"; // make modal visible
 
     // write dynamic content for entry (aka blip)
-    writeBlipToModal(entry);
+    writeBlipPropertiesToModal(entry);
     // Get the <span> element that closes the modal
     var span = document.getElementsByClassName("close")[0];
     // When the user clicks on <span> (x), close the modal
@@ -53,9 +55,59 @@ const showModal = function (entry) {
         }
     }
 }
-function writeBlipToModal(entry) {
-    const label = document.getElementById("modal_label");
-    label.innerText = entry.label;
+
+function writeTextInElement(elementId, text) {
+    const el = document.getElementById(elementId);
+    el.innerText = text ? text : "";
+}
+
+function writeValueInElement(elementId, value) {
+    const el = document.getElementById(elementId);
+    el.value = value ? value : "";
+}
+
+function getValueInElement(elementId) {
+    const el = document.getElementById(elementId);
+    return el.value
+}
+const ambitionMap = { 0: "Nothing yet (Hold)", 1: "Asses/Explore", 2: "(go do) Trial/PoC/Prototype", 3: "Apply (push enthusiastically)", 4: "Deprecate (now new usage)", 5: "RIP/Stop using" }
+const currentStatusMap = { 0: "Nothing done yet/Interested", 1: "Exploring/Explored", 2: "Trying/PoC-ed/Prototyped", 3: "(ready for) applying", 4: "Retiring/Stepping away from", 5: "Not interested (now/anmymore)" }
+const magnitudeMap = { 0: "0: niche (< 5%)", 1: "1: occasionally, some people", 2: "2: many people, quite often", 3: "3: almost everyone, almost all the time" }
+const relevanceMap = { 0: "hard relevant", 1: "limited relevance/maybe some potential, nice to have", 2: "quite relevant, should have", 3: "crucial, must have" }
+const marketAdoptionStatusMap = { 0: "innovators, cutting edge", 1: "early adopters", 2: "early majority, arrived in main stream", 3: "late majority", 4: "even laggards, full market adoption" }
+const communityRatingMap = { 0: "0: embryonic/dying", 1: "1: starting/limited/dwindling", 2: "2: medium/moderate", 3: "3: high" }
+const granularityMap = { 0: "high over, abstract", 1: "large yet concrete", 2: "detail, very specific" }
+
+function writeBlipPropertiesToModal(entry) {
+    writeTextInElement("entryTitle", entry.label)
+    writeTextInElement("entryVendor", entry.vendor)
+    writeTextInElement("entryTags", entry.tags)
+    writeTextInElement("entryCategory", entry.category)
+    writeTextInElement("entryHomepage", entry.homepage)
+    writeTextInElement("entryLastMajorUpdateDate", entry.lastMajorUpdateDate)
+    writeTextInElement("entryLastMajorUpdateLabel", entry.lastMajorUpdateLabel)
+    writeTextInElement("entryDescription", entry.description)
+    writeTextInElement("entryLicenseModel", entry.licenseModel)
+
+    writeTextInElement("entryScope", entry.scope)
+    writeTextInElement("entryIntroductionDate", entry.introductionDate)
+    writeTextInElement("entryInitialReleaseDate", entry.initialReleaseDate)
+    writeTextInElement("entryAmbition", `${entry.ambition}: ${ambitionMap[entry.ambition]}` )
+    writeTextInElement("entryCurrentStatus", `${entry.currentStatus}: ${currentStatusMap[entry.currentStatus]}`)
+    writeTextInElement("entryRationale", entry.rationale)
+    writeTextInElement("entryGrowthShareStatus", entry.growthShareStatus)
+    writeTextInElement("entryMagnitude", magnitudeMap[entry.magnitude])
+    writeTextInElement("entryRelevance", relevanceMap[entry.relevance])
+    writeTextInElement("entryMarketAdoptionStatus", marketAdoptionStatusMap[entry.marketAdoptionStatus])
+    writeTextInElement("entryCommunityRating", communityRatingMap[entry.communityRating])
+    writeTextInElement("entryGranularity", granularityMap[entry.granularity])
+
+
+    const homepage = document.getElementById("entryHomepage");
+    if (homepage && entry.homepage) {
+        homepage.href = entry.homepage;
+    }
+
     const logo = document.getElementById("modal_logo");
     if (entry.logo) {
         logo.src = entry.logo;
@@ -63,6 +115,83 @@ function writeBlipToModal(entry) {
     }
     else
         logo.style.display = "none";
+}
+
+function writeBlipPropertiesToModalEditor(entry) {
+    writeValueInElement("editEntryLogo", entry.logo)
+    writeValueInElement("editEntryLabel", entry.label)
+    writeValueInElement("editEntryCategory", entry.category)
+    writeValueInElement("editEntryCurrentStatus", entry.currentStatus)
+    writeValueInElement("editEntryAmbition", entry.ambition)
+    writeValueInElement("editEntryMagnitude", entry.magnitude)
+    // writeValueInElement("editEntryCategory", entry.category)
+    
+}
+
+const handleEdit = function () {
+    // hide myModal
+    const myModal = document.getElementById("myModal");
+    myModal.style.display = "none";
+
+    // bring out myModalEditor
+    const myModalEditor = document.getElementById("myModalEditor");
+    myModalEditor.style.display = "block";
+
+    var span = document.getElementsByClassName("close")[1];
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function () {
+        myModalEditor.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+        if (event.target == myModalEditor) {
+            myModalEditor.style.display = "none";
+        }
+    }
+
+    const title = document.getElementById("modalEditorTitle");
+    title.innerText= `Edit details for ${currentEntry.label}`
+    
+    // now populate the controls in the editor with the appropriate values
+    writeBlipPropertiesToModalEditor(currentEntry)
+    const logo = document.getElementById("edit_modal_logo");
+    if (currentEntry.logo) {
+        logo.src = currentEntry.logo;
+        logo.style.display = "block";
+    }
+    else
+        logo.style.display = "none";
+
+}
+
+const handleSave = function () {
+    // show myModal
+    const myModal = document.getElementById("myModal");
+    myModal.style.display = "block";
+
+    // hide myModalEditor
+    const myModalEditor = document.getElementById("myModalEditor");
+    myModalEditor.style.display = "none";
+    // read details from input fields in myModalEditor and transfer to current entry
+    currentEntry.label =  getValueInElement("editEntryLabel")
+    currentEntry.logo =  getValueInElement("editEntryLogo")
+    currentEntry.category =  getValueInElement("editEntryCategory")
+    currentEntry.currentStatus =  getValueInElement("editEntryCurrentStatus")
+    currentEntry.ambition =  getValueInElement("editEntryAmbition")
+    currentEntry.magnitude =  getValueInElement("editEntryMagnitude")
+    
+    writeBlipPropertiesToModal(currentEntry)
+    refreshRadar()
+}
+
+const handleCancelEdit = function () {
+    // hide myModalEditor
+    const myModalEditor = document.getElementById("myModalEditor");
+    myModalEditor.style.display = "none";
+    // show myModal
+    const myModal = document.getElementById("myModal");
+    myModal.style.display = "block";
 }
 
 /********************   Labels Filter */
@@ -129,10 +258,18 @@ const initializeFileUpload = function () {
     fileElem.addEventListener("change", handleFiles, false);
 }
 
-async function  handleFiles() {
+async function handleFiles() {
     if (!this.files.length) {
         fileList.innerHTML = "<p>No files selected!</p>";
     } else {
+        // check if uploaded entries are to be merged or should overwrite/replace
+        const fileMergeCheck = document.getElementById("fileMerge")
+        console.log(`file merge check ${fileMergeCheck.checked}`)
+        if (!fileMergeCheck.checked && this.files.length > 0) {
+            // overwrite
+            radarEntries = []
+        }
+
         fileList.innerHTML = "";
         const list = document.createElement("ul");
         fileList.appendChild(list);
@@ -148,7 +285,7 @@ async function  handleFiles() {
             const newEntries = JSON.parse(contents)
             // naively concat the existing entries with these new ones
             // TODO: duplicate elements in resulting array should be resolved; the newest entry "wins"
-            radarEntries = radarEntries.concat(newEntries)            
+            radarEntries = radarEntries.concat(newEntries)
 
         }
         refreshRadar()
@@ -161,17 +298,17 @@ function download(filename, text) {
     var element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
     element.setAttribute('download', filename);
-  
+
     element.style.display = 'none';
     document.body.appendChild(element);
-  
+
     element.click();
-  
+
     document.body.removeChild(element);
-  }
-  
-const downloadEntriesCurrentViewpointFilter = function() {
-    download(`techradar-${getCurrentConfiguration().label}-entries.json`, JSON.stringify(getCurrentConfiguration().getEntries()) )
+}
+
+const downloadEntriesCurrentViewpointFilter = function () {
+    download(`techradar-${getCurrentConfiguration().label}-entries.json`, JSON.stringify(getCurrentConfiguration().getEntries()))
 }
 
 
@@ -179,29 +316,37 @@ const initializeControls = function (config) {
 
     initializeFileUpload()
 
+    initializeTagsFilter(config);
+
+    initializeViewpointSelection();
+}
+
+function initializeViewpointSelection() {
+    const getHandlePickViewpoint = function (index) {
+        const viewPointIndex = index;
+        return () => { handlePickViewpoint(viewPointIndex); };
+    };
+
+    // viewPoint selection
+    var viewpointSelectionContainer = document.getElementById("viewpoint-selection");
+    removeAllChildNodes(viewpointSelectionContainer);
+
+    //<a href="#" onclick="handlePickViewpoint(0)">Traditional</a>
+    configurations.forEach((config, index) => {
+        const link = document.createElement("a");
+        link.innerText = config.label;
+        link.addEventListener("click", getHandlePickViewpoint(index));
+        viewpointSelectionContainer.appendChild(link);
+    }
+    );
+}
+
+function initializeTagsFilter(config) {
     var btnContainer = document.getElementById("myBtnContainer");
-    createFiltersForTags(btnContainer, config.getEntries())
+    createFiltersForTags(btnContainer, config.getEntries());
     var btns = btnContainer.getElementsByClassName("btn");
     for (var i = 0; i < btns.length; i++) {
         btns[i].addEventListener("click", toggleActive
         );
     }
-
-    const getHandlePickViewpoint = function (index) {
-        const viewPointIndex = index
-        return () => { handlePickViewpoint(viewPointIndex) }
-    }
-
-    // viewPoint selection
-    var viewpointSelectionContainer = document.getElementById("viewpoint-selection");
-    removeAllChildNodes(viewpointSelectionContainer)
-    
-    //<a href="#" onclick="handlePickViewpoint(0)">Traditional</a>
-    configurations.forEach((config, index) => {
-        const link = document.createElement("a")
-        link.innerText = config.label
-        link.addEventListener("click", getHandlePickViewpoint(index))
-        viewpointSelectionContainer.appendChild(link);
-    }
-    )
 }

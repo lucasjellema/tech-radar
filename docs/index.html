@@ -40,80 +40,573 @@
 
   <link rel="stylesheet" href="radar.css">
   <link rel="stylesheet" href="controls.css">
+
 </head>
 
 <body>
+
   <button type="button" class="collapsible" onclick="handleCollapsible(this)">Configuration Settings</button>
   <div class="content">
     <table>
-      <tr>
-        <td>Pick the Radar Viewpoint</td>
-        <td>
-          <div class="dropdown">
-            <button class="dropbtn">Radar Viewpoints</button>
-            <div id="viewpoint-selection" class="dropdown-content">
+      <tbody>
+        <tr>
+          <td>Pick the Radar Viewpoint</td>
+          <td>
+            <div class="dropdown">
+              <button class="dropbtn">Radar Viewpoints</button>
+              <div id="viewpoint-selection" class="dropdown-content">
+              </div>
             </div>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td>Display Style Blips</td>
-        <td>
-          <label class="radio-inline">
-            <input type="radio" name="blip-displaystyle-optradio" value="shapes"
-              onchange="handleBlipDisplayStyleChange()" checked>Shapes
-          </label>
-          <label class="radio-inline">
-            <input type="radio" name="blip-displaystyle-optradio" value="logos"
-              onchange="handleBlipDisplayStyleChange()">Logos
-          </label>
-          <label class="radio-inline">
-            <input type="radio" name="blip-displaystyle-optradio" value="text"
-              onchange="handleBlipDisplayStyleChange()">Text
-          </label>
-        </td>
-      </tr>
-      <tr>
-        <td>Filter Labels
-        </td>
-        <td>
-          <div id="myBtnContainer">
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td>Need All Tags? (or one or more)</td>
-        <td>
-          <label class="switch">
-            <input id="all_tags" type="checkbox" onchange="handleAllTagsToggle()">
-            <span class="slider round"></span>
-          </label>
-        </td>
-      </tr>
-      <tr>
-        <td>Upload and Merge Additional Entries
-          <input type="file" id="fileElem" multiple accept="application/json,text/*" style="display:none">
-          <button id="fileSelect">Select file(s)</button>
-          <div id="fileList">
-            <p>No files selected!</p>
-          </div>
-        </td>
-        <td>Download Current Entry Selection
-          <a href="#" onclick="downloadEntriesCurrentViewpointFilter()">Click to Download</a>
-        </td>
-      </tr>
+          </td>
+        </tr>
+        <tr>
+          <td>Display Style Blips</td>
+          <td>
+            <label class="radio-inline">
+              <input type="radio" name="blip-displaystyle-optradio" value="shapes"
+                onchange="handleBlipDisplayStyleChange()" checked>Shapes
+            </label>
+            <label class="radio-inline">
+              <input type="radio" name="blip-displaystyle-optradio" value="logos"
+                onchange="handleBlipDisplayStyleChange()">Logos
+            </label>
+            <label class="radio-inline">
+              <input type="radio" name="blip-displaystyle-optradio" value="text"
+                onchange="handleBlipDisplayStyleChange()">Text
+            </label>
+          </td>
+        </tr>
+        <tr>
+          <td>Filter Labels
+          </td>
+          <td>
+            <div id="myBtnContainer">
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Need All Tags? (or one or more)</td>
+          <td>
+            <label class="switch">
+              <input id="all_tags" type="checkbox" onchange="handleAllTagsToggle()">
+              <span class="slider round"></span>
+            </label>
+          </td>
+        </tr>
+        <tr>
+          <td>Upload Entries
+            <input type="file" id="fileElem" multiple accept="application/json,text/*" style="display:none">
+            <input type="checkbox" id="fileMerge">Merge entries from file (or overwrite)</input><br />
+            <button id="fileSelect">Select file(s)</button>
+            <div id="fileList">
+              <p>No files selected!</p>
+            </div>
+          </td>
+          <td>Download Current Entry Selection
+            <a href="#" onclick="downloadEntriesCurrentViewpointFilter()">Click to Download</a>
+          </td>
+        </tr>
+      </tbody>
     </table>
   </div>
   <div id="myModal" class="modal">
     <!-- Modal content to present details for the radar entries or blips -->
     <div class="modal-content">
       <span class="close">&times;</span>
-      <h2>Item</h2>
-      <h3>Label</h3><span id="modal_label"></span>
-      <img id="modal_logo" height="100px" />
-    </div>
-  </div>
+      <div class="row">
+        <div class="column">
+          <table class="propertyTable">
+            <tr>
+              <td class="labelColumn" colspan="=2">
+                <h2 id="entryTitle"></h2>
+                <img id="modal_logo" height="100px" />
+                <button onclick="handleEdit()">Edit</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Category
+                  <span class="modalTooltiptext">Category, Classification or Type</span>
+                </h5>
+              </td>
+              <td>
+                <span id="entryCategory"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Tags
+                  <span class="modalTooltiptext">keywords or qualifiers that provide additional guidance</span>
+                </h5>
+              </td>
+              <td>
+                <span id="entryTags"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Vendor
+                  <span class="modalTooltiptext">Commercial backer, main sponsor or owner; overseeing body or open
+                    source
+                    project</span>
+                </h5>
+              </td>
+              <td>
+                <span id="entryVendor"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Initial Release Date
+                  <span class="modalTooltiptext">Year or date of first relevant presence</span>
+                </h5>
+              </td>
+              <td>
+                <span id="entryInitialReleaseDate"></span>
+              </td>
+            </tr>
 
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Date of Last Update
+                  <span class="modalTooltiptext">Year or date most recent major new release</span>
+                </h5>
+              </td>
+              <td>
+                <span id="entryLastMajorUpdateDate"></span>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Current Version
+                  <span class="modalTooltiptext">Label for most recent major update - version, project name</span>
+                </h5>
+              </td>
+              <td>
+                <span id="entryLastMajorUpdateLabel"></span>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Description
+                  <span class="modalTooltiptext">Verbose description</span>
+                </h5>
+              </td>
+              <td>
+                <span id="entryDescription"></span>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">License Model
+                  <span class="modalTooltiptext">Consumption Model - commercial license, cloud subscription, open source
+                    model</span>
+                </h5>
+              </td>
+              <td>
+                <span id="entryLicenseModel"></span>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Homepage
+                  <span class="modalTooltiptext">Link to (most relevant) website for this entry</span>
+                </h5>
+              </td>
+              <td>
+                <a id="entryHomepage" href="" target="_new"></a>
+              </td>
+            </tr>
+          </table>
+
+        </div>
+        <div class="column">
+          <table class="propertyTable">
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Scope
+                  <span class="modalTooltiptext">The scope or context for the subjective ratings such as current status,
+                    ambition, relevance, magnitude</span>
+                </h5>
+              </td>
+              <td>
+                <span id="entryScope"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Introduction Date
+                  <span class="modalTooltiptext">Date when this entry first appeared on our radar</span>
+                </h5>
+              </td>
+              <td> <span id="entryIntroductionDate"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Granularity
+                  <span class="modalTooltiptext">level of detail and specificity</span>
+                </h5>
+              </td>
+              <td> <span id="entryGranularity"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Community Rating
+                  <span class="modalTooltiptext">(our assessment of the) community sentiment, adoption and
+                    momentum</span>
+                </h5>
+              </td>
+              <td> <span id="entryCommunityRating"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Market Adoption Status
+                  <span class="modalTooltiptext">(our assessment of the) Status in terms of market
+                    adoption/penetration</span>
+                </h5>
+              </td>
+              <td> <span id="entryMarketAdoptionStatus"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Relevance
+                  <span class="modalTooltiptext">Indication of how important this entry is for us (our customers, our
+                    colleagues, our strategy)</span>
+                </h5>
+              </td>
+              <td> <span id="entryRelevance"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Magnitude
+                  <span class="modalTooltiptext">Indication of size of entry in our organization</span>
+                </h5>
+              </td>
+              <td> <span id="entryMagnitude"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Growth Share Status
+                  <span class="modalTooltiptext">Status according to BCG Growth Market Share Matrix given our
+                    organization and our customers & strategy (star, dog, cash cow, question mark)</span>
+                </h5>
+              </td>
+              <td> <span id="entryGrowthShareStatus"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Current Status
+                  <span class="modalTooltiptext">What is (until) today the status of this entry for us? 0 = nothing done yet/interested, 1 = exploring/explored, 2=trying out (prototype/PoC), 3 = (ready for) applying/applied for real, 4=retiring/deprecated, 5=not interested (now/anymore)</span>
+                </h5>
+              </td>
+              <td> <span id="entryCurrentStatus"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Ambition
+                  <span class="modalTooltiptext">What is our ambition/where do we want to go from today onwards</span>
+                </h5>
+              </td>
+              <td> <span id="entryAmbition"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Rationale
+                  <span class="modalTooltiptext">explanation of the the subjective ratings - how did we arrive at our
+                    assessment</span>
+                </h5>
+              </td>
+              <td> <span id="entryRationale"></span>
+              </td>
+            </tr>
+
+          </table>
+        </div>
+      </div>
+
+
+    </div>
+
+  </div>
+  <div id="myModalEditor" class="modal" style="display:none">
+    <!-- Modal content to edit the details for the radar entries or blips -->
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div class="row">
+        <div class="column">
+          <table class="propertyTable">
+            <tr>
+              <td colspan="2">
+                <button onclick="handleSave()">Apply Changes</button>
+                <button onclick="handleCancelEdit()">Cancel</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn" colspan="=2">
+                <h2 id="entryTitle"><span id="modalEditorTitle">Edit Details</span></h2>
+                <img id="edit_modal_logo" height="100px" />
+
+              </td>
+              <td>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Logo
+                  <span class="modalTooltiptext">Logo (url to image or base64 encoded image content)</span>
+                </h5>
+              </td>
+              <td>
+                <input type="text" placeholder="Label" name="logo" id="editEntryLogo" class="input-field" >
+              </td>
+            </tr>
+
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Name
+                  <span class="modalTooltiptext">Name or Label</span>
+                </h5>
+              </td>
+              <td>
+                <input type="text" placeholder="Name or Label" name="name" id="editEntryLabel" class="input-field" >
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Category
+                  <span class="modalTooltiptext">Category, Classification or Type</span>
+                </h5>
+              </td>
+              <td>
+                
+                <input type="text" placeholder="Category" name="category" id="editEntryCategory" class="input-field" >
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Tags
+                  <span class="modalTooltiptext">keywords or qualifiers that provide additional guidance</span>
+                </h5>
+              </td>
+              <td>
+                <span id="entryTags"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Vendor
+                  <span class="modalTooltiptext">Commercial backer, main sponsor or owner; overseeing body or open
+                    source
+                    project</span>
+                </h5>
+              </td>
+              <td>
+                <span id="entryVendor"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Initial Release Date
+                  <span class="modalTooltiptext">Year or date of first relevant presence</span>
+                </h5>
+              </td>
+              <td>
+                <span id="entryInitialReleaseDate"></span>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Date of Last Update
+                  <span class="modalTooltiptext">Year or date most recent major new release</span>
+                </h5>
+              </td>
+              <td>
+                <span id="entryLastMajorUpdateDate"></span>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Current Version
+                  <span class="modalTooltiptext">Label for most recent major update - version, project name</span>
+                </h5>
+              </td>
+              <td>
+                <span id="entryLastMajorUpdateLabel"></span>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Description
+                  <span class="modalTooltiptext">Verbose description</span>
+                </h5>
+              </td>
+              <td>
+                <span id="entryDescription"></span>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">License Model
+                  <span class="modalTooltiptext">Consumption Model - commercial license, cloud subscription, open source
+                    model</span>
+                </h5>
+              </td>
+              <td>
+                <span id="entryLicenseModel"></span>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Homepage
+                  <span class="modalTooltiptext">Link to (most relevant) website for this entry</span>
+                </h5>
+              </td>
+              <td>
+                <a id="entryHomepage" href="" target="_new"></a>
+              </td>
+            </tr>
+          </table>
+
+        </div>
+        <div class="column">
+          <table class="propertyTable">
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Scope
+                  <span class="modalTooltiptext">The scope or context for the subjective ratings such as current status,
+                    ambition, relevance, magnitude</span>
+                </h5>
+              </td>
+              <td>
+                <span id="entryScope"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Introduction Date
+                  <span class="modalTooltiptext">Date when this entry first appeared on our radar</span>
+                </h5>
+              </td>
+              <td> <span id="entryIntroductionDate"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Granularity
+                  <span class="modalTooltiptext">level of detail and specificity</span>
+                </h5>
+              </td>
+              <td> <span id="entryGranularity"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Community Rating
+                  <span class="modalTooltiptext">(our assessment of the) community sentiment, adoption and
+                    momentum</span>
+                </h5>
+              </td>
+              <td> <span id="entryCommunityRating"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Market Adoption Status
+                  <span class="modalTooltiptext">(our assessment of the) Status in terms of market
+                    adoption/penetration</span>
+                </h5>
+              </td>
+              <td> <span id="entryMarketAdoptionStatus"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Relevance
+                  <span class="modalTooltiptext">Indication of how important this entry is for us (our customers, our
+                    colleagues, our strategy)</span>
+                </h5>
+              </td>
+              <td> <span id="entryRelevance"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Magnitude
+                  <span class="modalTooltiptext">Indication of size of this entry in our organization; 0 = niche (< 5 % ), 1 = occasionally, some people, 2 = many people, very often, 3 = virtually everyone and/or very frequently or almost all the time - based on number or % of people that is involved with this entry and the frequency and duration of their involvement</span>
+                </h5>
+              </td>
+              <td> 
+                <input type="text" placeholder="Magnitude Status for Us" name="magnitude" id="editEntryMagnitude" class="input-field" >
+
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Growth Share Status
+                  <span class="modalTooltiptext">Status according to BCG Growth Market Share Matrix given our
+                    organization and our customers & strategy (star, dog, cash cow, question mark)</span>
+                </h5>
+              </td>
+              <td> <span id="entryGrowthShareStatus"></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Current Status
+                  <span class="modalTooltiptext">What is (until) today the status of this entry for us?</span>
+                </h5>
+              </td>
+              <td> 
+                 <input type="text" placeholder="Current Status for Us" name="currentStatus" id="editEntryCurrentStatus" class="input-field" >
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Ambition
+                  <span class="modalTooltiptext">What is our ambition/where do we want to go from today onwards</span>
+                </h5>
+              </td>
+              <td> 
+                <input type="text" placeholder="Ambition" name="ambition" id="editEntryAmbition" class="input-field" >
+              </td>
+            </tr>
+            <tr>
+              <td class="labelColumn">
+                <h5 class="modalTooltip">Rationale
+                  <span class="modalTooltiptext">explanation of the the subjective ratings - how did we arrive at our
+                    assessment</span>
+                </h5>
+              </td>
+              <td> <span id="entryRationale"></span>
+              </td>
+            </tr>
+
+          </table>
+        </div>
+      </div>
+
+
+    </div>
+
+  </div>
   <div id="svgContainer">
     <svg id="radar"></svg>
   </div>

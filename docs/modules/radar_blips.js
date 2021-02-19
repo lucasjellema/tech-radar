@@ -22,17 +22,7 @@ const showBubble = function (d) {
     }
 }
 
-// this function determines what the radius should be for the circle to be drawn for this entry
-// note: the original value for all blips was 9
 const originalBlipRadius = 9
-const getCircleRadiusForBlip = function (entry) {
-    // here we can use properties of the entry to increase or decrease the size of the blip
-    let radius = originalBlipRadius
-    if (entry.importance) {
-        radius = radius * entry.importance
-    }
-    return radius
-}
 
 let legend_offset
 
@@ -43,7 +33,7 @@ const drawBlips = function (config, rink, segmented, the_legend_offset) {
         .enter()
         .append("g")
         .attr("class", "blip")
-        .attr("transform", function (d, i) { return legend_transform(d.quadrant, d.ring, segmented, i); })
+        .attr("transform", function (d, i) { return legend_transform(config.getQuadrant(d), config.getRing(d), segmented, i); })
         .on("click", function (d) { showModal(d); })
         .on("mouseover", function (d) { showBubble(d); highlightLegendItem(d); })
         .on("mouseout", function (d) { hideBubble(d); unhighlightLegendItem(d); });
@@ -93,21 +83,28 @@ const drawBlips = function (config, rink, segmented, the_legend_offset) {
             // here the shape to be drawn is determined, including its size
             // todo: stop sign for entries no longer used?
             // blip shape
+            let shape
             if (d.moved > 0) {
-                blip.append("path")
+                shape = blip.append("path")
                     .attr("d", "M -11,5 11,5 0,-13 z") // triangle pointing up
                     .style("fill", d.color);
             } else if (d.moved < 0) {
-                blip.append("path")
+                shape = blip.append("path")
                     .attr("d", "M -11,-5 11,-5 0,13 z") // triangle pointing down
                     .style("fill", d.color);
             } else {
-                blip.append("circle")
-                    .attr("r", getCircleRadiusForBlip(d)) // here we can determine the size of the circle - based on the properties of the entry
+                shape = blip.append("circle")
+                    .attr("r", originalBlipRadius)
                     .attr("fill", d.color)
-                    .attr("transform", "scale(2 2)") // derive scale based on SIZE of entry
-            }
 
+            }
+            if (getCurrentConfiguration().getSize != null) {
+                let scaleFactor = 1
+                if (getCurrentConfiguration().getSize(d) == 0) scaleFactor = 0.7
+                if (getCurrentConfiguration().getSize(d) > 1) scaleFactor = 1 + (getCurrentConfiguration().getSize(d) - 1) / 2
+                scaleFactor = scaleFactor* 1.3
+                shape.attr("transform", `scale(${scaleFactor} ${scaleFactor})`) // derive scale based on SIZE of entryAmbition
+            }
             // blip text to be printed inside the shape - currently the randomly assigned sequence number
             if (d.active || config.print_layout) {
                 var blip_text = config.print_layout ? d.id : d.label.match(/[a-z]/i);
