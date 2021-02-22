@@ -289,3 +289,8 @@
 .input-field:focus {
   border: 2px solid dodgerblue;
 }
+
+
+.clickableProperty {
+  cursor:pointer;
+}

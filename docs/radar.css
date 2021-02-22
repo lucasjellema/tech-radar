@@ -17,3 +17,10 @@ td {
   vertical-align: top;
   padding-right: 60px;
 }
+
+.static {
+  cursor: not-allowed;
+}
+.draggable ,  .draggable-group{
+  cursor: move;
+}

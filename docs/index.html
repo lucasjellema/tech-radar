@@ -6,6 +6,7 @@
   <link rel="shortcut icon" href="https://res.conclusion.nl/inc/img/favicon.gif">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <script>let plotRadar
+  let getSectorForXYCoordinates
     let radarEntries = []
     let currentConfiguration = 0 // currently selected viewpoint
     const configurations = [] // store for the configurations for the viewpoints
@@ -15,6 +16,8 @@
   </script>
   <script type="module">
     // load the configurations for all viewpoints
+    import { config as madelongRadarConfig } from './modules/madelon-radar.js';
+    configurations.push(madelongRadarConfig)
     import { config as traditionalRadarConfig } from './modules/traditional_radar.js';
     configurations.push(traditionalRadarConfig)
     import { config as bcgmatrixRadarConfig } from './modules/bcgmatrix_radar.js';
@@ -28,14 +31,15 @@
     }
   </script>
   <script type="module">
-    import { radar_visualization } from './radar.js';
+    import { radar_visualization , getSectorForCoordinates} from './radar.js';
     plotRadar = radar_visualization  // imports from a module can only be done from within a module; however, we cannot import/export between inline modules such as this one; hence the use of plotRadar as a DIY form of exporting the imported function
-
+    getSectorForXYCoordinates = getSectorForCoordinates
 
 
   </script>
   <script src="https://d3js.org/d3.v4.min.js"></script>
-  <script src="entries.js"></script>
+  
+  <script src="madelon-entries.js"></script>
   <script src="controls.js"></script>
 
   <link rel="stylesheet" href="radar.css">
@@ -641,12 +645,90 @@
     </div>
 
   </div>
+  <script>
+    /*********  DRAG AND DROP 
+     * https://www.petercollingridge.co.uk/tutorials/svg/interactive/dragging/
+     * 
+    */
+
+    function makeDraggable(evt) {
+        var svg = evt.target;
+        svg.addEventListener('mousedown', startDrag);
+        svg.addEventListener('mousemove', drag);
+        svg.addEventListener('mouseup', endDrag);
+        svg.addEventListener('mouseleave', endDrag);
+
+        function getMousePosition(evt) {
+          var CTM = svg.getScreenCTM();
+          if (evt.touches) { evt = evt.touches[0]; }
+          return {
+            x: (evt.clientX - CTM.e) / CTM.a,
+            y: (evt.clientY - CTM.f) / CTM.d
+          };
+        }
+
+        var selectedElement, offset, transform;
+
+        function initialiseDragging(evt) {
+            offset = getMousePosition(evt);
+
+            // Make sure the first transform on the element is a translate transform
+            var transforms = selectedElement.transform.baseVal;
+
+            if (transforms.length === 0 || transforms.getItem(0).type !== SVGTransform.SVG_TRANSFORM_TRANSLATE) {
+              // Create an transform that translates by (0, 0)
+              var translate = svg.createSVGTransform();
+              translate.setTranslate(0, 0);
+              selectedElement.transform.baseVal.insertItemBefore(translate, 0);
+            }
+
+            // Get initial translation
+            transform = transforms.getItem(0);
+            offset.x -= transform.matrix.e;
+            offset.y -= transform.matrix.f;
+        }
+
+        function startDrag(evt) {
+          if (evt.target.classList.contains('draggable')) {
+            selectedElement = evt.target;
+            initialiseDragging(evt);
+          } else if (evt.target.parentNode.classList.contains('draggable-group')) {
+            selectedElement = evt.target.parentNode;
+            initialiseDragging(evt);
+          }
+        }
+
+        function drag(evt) {
+          if (selectedElement) {
+            evt.preventDefault();
+            var coord = getMousePosition(evt);
+            transform.setTranslate(coord.x - offset.x, coord.y - offset.y);
+          }
+        }
+
+        function endDrag(evt) {
+          if (selectedElement) {
+          var coord = getMousePosition(evt);
+          const blipId = selectedElement.getAttributeNS(null, "id")
+          // find entry with blipId
+          const entry = getCurrentConfiguration().getEntries().filter( (entry) => entry.label == blipId)[0]
+          console.log(`end drag of ${blipId} x= ${coord.x}, y = ${coord.y}`)
+          const sector = getSectorForXYCoordinates(coord.x, coord.y)
+          console.log(`drop Sector  ${JSON.stringify(sector)} `)
+          if (getCurrentConfiguration().handleSectorDrop)
+            getCurrentConfiguration().handleSectorDrop(entry,sector)
+          selectedElement = false;
+          }
+        }
+      }
+  </script>
   <div id="svgContainer">
-    <svg id="radar"></svg>
+    <svg id="radar" onload="makeDraggable(evt)"></svg>
   </div>
   <script type="module">
     // initial display of the default radar
     refreshRadar()
+
   </script>
 
   <table>

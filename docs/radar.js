@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export { radar_visualization }
+export { radar_visualization, getSectorForCoordinates }
 import { drawBlips, translate, showBubble, hideBubble } from './modules/radar_blips.js'
 // radial_min / radial_max are multiples of PI
 const quadrants = [
@@ -60,6 +60,34 @@ const legend_image_offset = [
 
 let configuration;
 
+const getSectorForCoordinates = function (x, y) { // determine from the X and Y the associated ring and quadrant
+  const polarCoords = polar({ x: x - 720, y: y - 500 }) // r relates to ring, t to sector
+  // take polarCoord.t, divide by PI and find the quadrant whose radial_min and max surround it
+  polarCoords.piNormalizedAngle = polarCoords.t / Math.PI
+  const sector = {}
+  for (let i = 0; i < quadrants.length; i++) {
+    if (quadrants[i].radial_min <= polarCoords.piNormalizedAngle && quadrants[i].radial_max >= polarCoords.piNormalizedAngle)
+      sector.quadrant = i
+  }
+  for (let i = 0; i < rings.length; i++) {
+    if (polarCoords.r < rings[i].radius) {
+      sector.ring = i
+      break
+    }
+  }
+  return sector;
+}
+
+function polar(cartesian) {
+  var x = cartesian.x;
+  var y = cartesian.y;
+  return {
+    t: Math.atan2(y, x),
+    r: Math.sqrt(x * x + y * y)
+  }
+}
+
+
 function radar_visualization(config) {
   configuration = config
   // custom random number generator, to make random sequence reproducible
@@ -79,14 +107,6 @@ function radar_visualization(config) {
   }
 
 
-  function polar(cartesian) {
-    var x = cartesian.x;
-    var y = cartesian.y;
-    return {
-      t: Math.atan2(y, x),
-      r: Math.sqrt(x * x + y * y)
-    }
-  }
 
   function cartesian(polar) {
     return {
@@ -313,9 +333,9 @@ function drawLegend(radar, translate, title_offset, config, footer_offset, legen
         .attr('width', 100)
         .attr("transform", translate(
           legend_image_offset[quadrant].x,
-          legend_image_offset[quadrant].y 
+          legend_image_offset[quadrant].y
         ))
-          }
+    }
 
     for (var ring = 0; ring < 4; ring++) {
       legend.append("text")
@@ -428,3 +448,4 @@ function unhighlightLegendItem(d) {
   legendItem.removeAttribute("filter");
   legendItem.removeAttribute("fill");
 }
+

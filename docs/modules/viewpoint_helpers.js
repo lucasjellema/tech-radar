@@ -1,4 +1,4 @@
-export {getEntriesFilteredByTags}
+export {getEntriesFilteredByTags,getKeyForValue}
 
 const getEntriesFilteredByTags = function () {
     {
@@ -17,4 +17,8 @@ const getEntriesFilteredByTags = function () {
         }
         else return radarEntries
       }
+}
+
+const getKeyForValue = function (object, value) {
+  return Object.keys(object).find(key => object[key] === value);
 }
