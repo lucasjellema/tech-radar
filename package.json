@@ -1,9 +1,9 @@
 {
-  "name": "zalando-tech-radar",
-  "version": "2018.5.0",
-  "description": "Visualizing our technology choices",
-  "homepage": "https://github.com/zalando/tech-radar#readme",
-  "repository": "https://github.com/zalando/tech-radar.git",
+  "name": "conclusion-technology-radar",
+  "version": "2021.2.0",
+  "description": "Visualizing our technology choices - based on the Zalando radar that was based on the Thoughtworks Radar",
+  "homepage": "https://github.com/lucasjellema/tech-radar",
+  "repository": "https://github.com/lucasjellema/tech-radar.git",
   "license": "MIT",
   "directories": {
     "doc": "docs"

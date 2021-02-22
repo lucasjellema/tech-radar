@@ -1,6 +1,8 @@
 export { config }
 import { getEntriesFilteredByTags, getKeyForValue } from './viewpoint_helpers.js'
 
+const relevanceColorMap = { 0: "lightgray", 1: "green", 2: "orange", 3: "red" }
+const communityRatingShapeMap = { 0: "triangleDown", 1: "square", 2: "triangleUp", 3: "star" }
 let config = {
   svg_id: "radar",
   width: 1450,
@@ -12,6 +14,8 @@ let config = {
   },
   title: "AMIS | Conclusion Tech Radar — 2021.01",
   label: "Traditional Radar",
+  dataSetLabel: "conclusion-technologies",
+
   quadrants: [
     { name: "Languages" },
     { name: "Infrastructure" },
@@ -23,7 +27,12 @@ let config = {
     { name: "TRIAL", color: "#93d2c2" },
     { name: "ASSESS", color: "#fbdb84" },
     { name: "HOLD", color: "#efafa9" }
-  ],
+  ], blipColors: {
+    "colorTitle": "Relevance"
+    , colorOptions: relevanceColorMap
+  }, blipSizes: { sizeTitle: "Magnitude" },
+  blipShapes: { shapeTitle: "Community Rating" 
+, shapeOptions: communityRatingShapeMap},
   show_logos: false,
   blip_displayStyle: "shapes"
   , all_tags: false
@@ -42,12 +51,18 @@ let config = {
   }
   , getSize: (entry) => {
     return (entry != null && entry.magnitude != null) ? entry.magnitude : 1
+  },
+  handleSizePick: (entry, size) => {
+    entry.magnitude = size
   }
   , getShape: (entry) => {
     let shape = "circle"
-    if (entry.moved > 0) shape = "triangleUp"
-    if (entry.moved < 0) shape = "triangleDown"
-    return shape
+    const q = communityRatingShapeMap[entry.communityRating]
+    return (q != null) ? q : shape
+
+  },
+  handleShapePick: (entry, shapeLabel) => {
+    entry.communityRating = getKeyForValue(communityRatingShapeMap, shapeLabel)
   }
   , handleSectorDrop: (entry, sector) => {
     //console.log(`handleSectorDrop ${JSON.stringify(entry)} : ${JSON.stringify(sector)}`)
@@ -57,6 +72,11 @@ let config = {
     //console.log(`derived category and ambition ${category} and ${ambition}`)
     entry.ambition = ambition
     entry.category = category
+  }, getColor: (entry) => {
+    return entry.relevance ? relevanceColorMap[entry.relevance] : "green"
+  }
+  , handleColorPick: (entry, color) => {
+    entry.relevance = getKeyForValue(relevanceColorMap, color)
   }
 
 }

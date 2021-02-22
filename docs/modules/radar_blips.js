@@ -132,11 +132,15 @@ function drawBlip(blip, d, config) {
                 .attr("d", diamond)
         }
         else if (requiredShape == "square") {
-            const square= d3.symbol().type(d3.symbolSquare).size(350);
+            const square = d3.symbol().type(d3.symbolSquare).size(350);
             shape = blip.append("path")
                 .attr("d", square)
+        }  else if (requiredShape == "triangleRight") {
+            const triangleRight = d3.symbol().type(d3.symbolTriangle).size(350);
+            shape = blip.append("path")
+                .attr("d", triangleRight) //TODO make right pointing
         }
- 
+
         else {
             shape = blip.append("circle")
                 .attr("r", originalBlipRadius);
@@ -228,8 +232,8 @@ function contextMenu() {
         contextMenu.append('rect')
             .attr('x', x)
             .attr('y', y - 50)
-            .attr('width', 210)
-            .attr('height', 190)
+            .attr('width', 200)
+            .attr('height', 160)
             .attr('class', 'rect')
             .attr("style", "fill:silver;")
 
@@ -263,7 +267,7 @@ function contextMenu() {
             }
         }
         contextMenu.append('text')
-            .text("Inspanning")
+            .text(config.blipSizes.sizeTitle)
             .style("fill", "black")
             .attr('x', x + 5)
             .attr('y', y + 20)
@@ -305,7 +309,7 @@ function contextMenu() {
         }
 
         contextMenu.append('text')
-            .text("Taakhouder")
+            .text(config.blipShapes.shapeTitle)
             .style("fill", "black")
             .attr('x', x + 5)
             .attr('y', y + 65)
@@ -313,32 +317,85 @@ function contextMenu() {
         const shapeBox = contextMenu.append('g').attr('class', 'context-menu')
             .attr('x', x)
             .attr('y', y + 65)
-        let shape
-        // cater for circle, square, diamond, .. 
-        shape = shapeBox.append('circle')
-            .attr("r", 13)
-            .attr("fill", "white")
-            .attr("cx", x + 20)
-            .attr("cy", y + 85)
-        decorateShape(shape, entry, "circle");
+        let i = 0
 
-        shape = shapeBox.append('rect')
-            .attr('x', x + 45)
-            .attr('y', y + 72)
-            .attr('width', 26)
-            .attr('height', 26)
-            .attr("style", "fill:white;")
-        decorateShape(shape, entry, "square");
+        for (const shapeOption in config.blipShapes.shapeOptions) {
+            let shape = null
+            let desiredShape = config.blipShapes.shapeOptions[shapeOption]
+            let transform = ""
+            let posX = x + (i + 1) * 45 - 20
+            let posY = y + 90
+            const triangle = d3.symbol().type(d3.symbolTriangle).size(350);
 
-        shape = shapeBox.append('rect')
-            .attr('x', x + 80)
-            .attr('y', y + 74)
-            .attr('width', 20)
-            .attr('height', 20)
-            .attr("style", "fill:white;")
-            .attr('transform', `rotate(45 ${x + 80 + 10} ${y + 74 + 10})`)
-        decorateShape(shape, entry, "diamond");
+            if (desiredShape == "triangleUp") {
+                shape = shapeBox.append("path")
+                    .attr("d", triangle)
+                    ;
+            }
 
+            // cater for circle, square, diamond, .. 
+            if (desiredShape == "circle") {
+                shape = shapeBox.append('circle')
+                    .attr("r", 13)
+                    .attr("cx", posX) // TODO proper value
+                    .attr("cy", posY)
+            }
+
+            if (desiredShape == "square") {
+                shape = shapeBox.append('rect')
+                   .attr('x', -13) // TODO correct
+                   .attr('y', -15)
+                    .attr('width', 26)
+                    .attr('height', 26)
+            }
+
+            if (desiredShape == "triangleRight") {
+                shape = shapeBox.append("path")
+                    .attr("d", triangle)
+                    ;
+                transform = `rotate(90 ${posX} ${posY - 2}) `
+            }
+            if (desiredShape == "triangleDown") {
+                shape = shapeBox.append("path")
+                    .attr("d", triangle)
+                transform = `rotate(-180 ${posX} ${posY - 4})`
+
+            }
+            if (desiredShape == "diamond") {
+                shape = shapeBox.append('rect')
+                    .attr('width', 20)
+                    .attr('height', 20)
+
+                transform = `rotate(45 ${posX + 15} ${posY - 13})`
+            }
+            if (desiredShape == "star") {
+                const star = d3.symbol().type(d3.symbolStar).size(350);
+                shape = shapeBox.append("path")
+                    .attr("d", star)
+                    ;
+
+            }
+            if (desiredShape == "triangleLeft") {
+                shape = shapeBox.append("path")
+                    .attr("d", triangle)
+                transform = `rotate(-90 ${posX} ${posY}) `
+            }
+            if (desiredShape == "rectUp") {
+                shape = shapeBox.append('rect')
+                    //            .attr('x', x + 120)
+                    //          .attr('y', y + 108)
+                    .attr('width', 8)
+                    .attr('height', 26)
+            }
+            // fill it up and move it to the right place
+            if (shape != null) {
+                shape.attr("style", "fill:white")
+                    .attr("transform", `${transform} translate(${posX},${posY})`)
+                decorateShape(shape, entry, desiredShape);
+            }
+            i++
+        }
+       
         // built in D3 symbols http://using-d3js.com/05_10_symbols.html
         // d3.symbolCross - A cross or plus
         // d3.symbolDiamond - A diamond
@@ -346,49 +403,6 @@ function contextMenu() {
         // d3.symbolStar - A 5 point star
         // d3.symbolTriangle - An equilateral triangle
         // d3.symbolWye - A wye or Latin Y
-
-        const triangle = d3.symbol().type(d3.symbolTriangle).size(350);
-        shape = shapeBox.append("path")
-            .attr("d", triangle)
-            .attr("transform", `translate(${x + 124},${y + 90})`)
-            .attr("style", "fill:white")
-            ;
-        decorateShape(shape, entry, "triangleUp");
-
-        shape = shapeBox.append("path")
-            .attr("d", triangle)
-            .attr("style", "fill:white")
-            .attr('transform', `rotate(90 ${x + 155} ${y + 88}) translate(${x + 155},${y + 88})`)
-            ;
-        decorateShape(shape, entry, "triangleRight");
-        // next line in shapebox, add 25 to y, x back to 10
-        shape = shapeBox.append("path")
-            .attr("d", triangle)
-            .attr("style", "fill:white")
-            .attr('transform', `rotate(-90 ${x + 21} ${y + 118}) translate(${x + 21},${y + 118})`)
-            ;
-        decorateShape(shape, entry, "triangleLeft");
-        shape = shapeBox.append("path")
-            .attr("d", triangle)
-            .attr("style", "fill:white")
-            .attr('transform', `rotate(-180 ${x + 56} ${y + 115}) translate(${x + 56},${y + 115})`)
-            ;
-        decorateShape(shape, entry, "triangleDown");
-        const star = d3.symbol().type(d3.symbolStar).size(350);
-        shape = shapeBox.append("path")
-            .attr("d", star)
-            .attr("style", "fill:white")
-            .attr('transform', `translate(${x + 91},${y + 118})`)
-            ;
-        decorateShape(shape, entry, "star");
-
-        shape = shapeBox.append('rect')
-            .attr('x', x + 120)
-            .attr('y', y + 108)
-            .attr('width', 8)
-            .attr('height', 26)
-            .attr("style", "fill:white;")
-        decorateShape(shape, entry, "rectUp");
 
         // Other interactions
         d3.select('body')

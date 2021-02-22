@@ -1,5 +1,8 @@
 export { config }
-import { getEntriesFilteredByTags,getKeyForValue } from './viewpoint_helpers.js'
+import { getEntriesFilteredByTags, getKeyForValue } from './viewpoint_helpers.js'
+
+const relevanceColorMap = { 0: "lightgray", 1: "green", 2: "orange", 3: "red" }
+const communityRatingShapeMap = { 0: "triangleDown", 1: "square", 2: "triangleUp", 3: "star" }
 
 let config = {
   svg_id: "radar",
@@ -12,6 +15,7 @@ let config = {
   },
   title: "AMIS | Conclusion BCG Growth Share Radar — 2021.01",
   label: "BCG Growth Share Matrix Radar",
+  dataSetLabel: "conclusion-technologies",
 
   quadrants: [
     { name: "Dogs", image: "https://cdn.pixabay.com/photo/2019/07/06/14/02/drawing-4320529_960_720.png" },
@@ -25,7 +29,14 @@ let config = {
     { name: "Minor", color: "#fbdb84" },
     { name: "None to Tiny", color: "#efafa9" }
   ],
-  show_logos: false,
+  show_logos: false, blipColors: {
+    "colorTitle": "Relevance"
+    , colorOptions: relevanceColorMap
+  }, blipSizes: { sizeTitle: "Magnitude" },
+  blipShapes: {
+    shapeTitle: "Community Rating"
+    , shapeOptions: communityRatingShapeMap
+  },
   blip_displayStyle: "shapes"
   , all_tags: false
   , print_layout: true,
@@ -43,6 +54,23 @@ let config = {
   }, handleSectorDrop: (entry, sector) => {
     entry.growthShareStatus = getKeyForValue(growthShareStatusQuadrantMap, sector.quadrant)
     entry.magnitude = getKeyForValue(magnitudeRingMap, sector.ring)
+  },
+  handleSizePick: (entry, size) => {
+    entry.magnitude = size
+  }
+  , getShape: (entry) => {
+    let shape = "circle"
+    const q = communityRatingShapeMap[entry.communityRating]
+    return (q != null) ? q : shape
+
+  },
+  handleShapePick: (entry, shapeLabel) => {
+    entry.communityRating = getKeyForValue(communityRatingShapeMap, shapeLabel)
+  }, getColor: (entry) => {
+    return entry.relevance ? relevanceColorMap[entry.relevance] : "green"
+  }
+  , handleColorPick: (entry, color) => {
+    entry.relevance = getKeyForValue(relevanceColorMap, color)
   }
 
 }
