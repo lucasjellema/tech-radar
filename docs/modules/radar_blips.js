@@ -66,17 +66,36 @@ function drawBlip(blip, d, config) {
 
 
     if (config.blip_displayStyle == "logos" && d.logo) {
-        blip.append('image')
+        let image = blip.append('image')
             .attr('xlink:href', d.logo)
             .attr('width', 80)
             .attr('height', 40)
             .attr("x", "-40") // if on left side, then move to the left, if on the right side then move to the right
             .attr("y", "-15");
-
+            // scale logo with factor derived from size
+            if (getCurrentConfiguration().getSize != null) {
+                let scaleFactor = 1;
+                if (getCurrentConfiguration().getSize(d) == 0)
+                    scaleFactor = 0.6;
+                if (getCurrentConfiguration().getSize(d) > 1)
+                    scaleFactor = 1 + (getCurrentConfiguration().getSize(d) - 1) / 5;
+                scaleFactor = scaleFactor * 1.3;
+                image.attr("transform", `scale(${scaleFactor} ${scaleFactor})`); // derive scale based on SIZE of entryAmbition
+            }
     }
 
     // svg text properties: https://vanseodesign.com/web-design/svg-text-font-properties/ 
     else if (config.blip_displayStyle == "text" || (!d.logo && config.blip_displayStyle == "logos")) {
+        let fontSize = 15
+        if (getCurrentConfiguration().getSize != null) {
+            let scaleFactor = 1;
+            if (getCurrentConfiguration().getSize(d) == 0)
+                scaleFactor = 0.6;
+            if (getCurrentConfiguration().getSize(d) > 1)
+                scaleFactor = 1 + (getCurrentConfiguration().getSize(d) - 1) / 2;
+            
+            fontSize = Math.round(fontSize * scaleFactor)
+        }
         blip.append("text")
             .text(d.label.length > 10 ? d.label.split(" ")[0] : d.label)
             .attr("x", 0) // if on left side, then move to the left, if on the right side then move to the right
@@ -86,15 +105,16 @@ function drawBlip(blip, d, config) {
             .style("fill", "#000")
             .style("font-family", "Arial, Helvetica")
             .style("font-stretch", "extra-condensed")
-            .style("font-size", function (d) { return d.label.length > 2 ? "15px" : "17px"; })
+            .style("font-size", function (d) { return d.label.length > 2 ? `${fontSize}px` : "17px"; })
             .style("user-select", "none");
         if (d.label.length > 10)
             blip.append("text")
                 .text(d.label.split(" ")[1]) //  break at space and write second line
                 .attr("text-anchor", "middle")
                 .attr("alignment-baseline", "before-edge")
+                .style("font-size", function (d) { return d.label.length > 2 ? `${fontSize}px` : "17px"; })
                 .attr("x", 0) // if on left side, then move to the left, if on the right side then move to the right
-                .attr("y", 8); // if on upper side, then move up, if on the down side then move down
+                .attr("y", -14 + fontSize); // if on upper side, then move up, if on the down side then move down
     }
 
     else { // blip_displayStyle == "shapes" is assumed here
