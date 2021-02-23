@@ -35,7 +35,7 @@
     configurations.push(bcgmatrixRadarConfig)
     import { config as madelongRadarConfig } from './modules/madelon-radar.js';
     configurations.push(madelongRadarConfig)
-   
+
 
   </script>
   <script>
@@ -52,8 +52,8 @@
   </script>
   <script src="https://d3js.org/d3.v4.min.js"></script>
 
-   <script src="entriesX.js"></script> 
-   <script src="controls.js"></script>
+  <script src="entriesX.js"></script>
+  <script src="controls.js"></script>
 
   <link rel="stylesheet" href="radar.css">
   <link rel="stylesheet" href="controls.css">
@@ -660,6 +660,15 @@
 
   </div>
   <script>
+
+    const addBlip = function () {
+      console.log("add blip")
+      if (getCurrentConfiguration().addEntry)
+        getCurrentConfiguration().addEntry()
+      else
+        radarEntries.push({ "label": "NEW" })
+      refreshRadar()
+    }
     /*********  DRAG AND DROP 
      * https://www.petercollingridge.co.uk/tutorials/svg/interactive/dragging/
      * 
@@ -737,7 +746,8 @@
     }
   </script>
   <div id="svgContainer">
-    <svg id="radar" onload="makeDraggable(evt)"></svg>
+    <svg id="radar" onload="makeDraggable(evt)">
+    </svg>
   </div>
   <script type="module">
     // initial display of the default radar

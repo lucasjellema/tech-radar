@@ -34,7 +34,8 @@ const rings = [
   { radius: 130 },
   { radius: 220 },
   { radius: 310 },
-  { radius: 400 }
+  { radius: 400 },
+  { radius: 490 }
 ];
 
 const title_offset =
@@ -240,6 +241,42 @@ function radar_visualization(config) {
     radar.attr("transform", translate(config.width / 2, config.height / 2));
   }
 
+// add the new blip button
+//      <a id="plusButton" href="#" onclick="addBlip()">
+/* n<g transform="
+translate(1350 20) scale(0.8)
+">
+<Circle id="addBlipButton" cx="30" cy="30" r="25" stroke="black" fill="green" stroke-width="3" />
+<line x1="14" y1="30" x2="46" y2="30" stroke-width="5" stroke="white"></line>
+<line x1="30" y1="14" x2="30" y2="46" stroke-width="5" stroke="white"></line>
+</g>
+</a>*/
+const addButton = radar.append("g")
+             .attr("id","plusBlipButton")
+             .attr("transform", `translate(${config.width / 2 -100 } ${-1 * config.height / 2}) scale(0.8)`)
+             .on("click", addBlip);
+ addButton.append("circle")
+      .attr("r", 25)
+      .attr("cx", 30)            
+      .attr("cy", 30)         
+      .attr("stroke","black")   
+      .attr("stroke-width",3)   
+      .attr("fill","green")
+      addButton.append("line")
+      .attr("x1", 14)
+      .attr("y1", 30)            
+      .attr("x2", 46)         
+      .attr("y2", 30)            
+      .attr("stroke","white")   
+      .attr("stroke-width",5)   
+      addButton.append("line")
+      .attr("x1", 30)
+      .attr("y1", 14)            
+      .attr("x2", 30)         
+      .attr("y2", 46)            
+      .attr("stroke","white")   
+      .attr("stroke-width",5)   
+            
   var grid = drawRadarGrid(radar, config);
   drawRings(rings, grid, config);
   if (config.print_layout) {
