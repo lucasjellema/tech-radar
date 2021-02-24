@@ -43,7 +43,7 @@ let config = {
   getEntries: (noFilter) => { return (noFilter ? radarEntries : getEntriesFilteredByTags()) }
   , getRing: (entry) => {
     const r = ambitionRingMap[entry.ambition]
-    return (r != null) ? r : (entry.ring ? entry.ring : 3)
+    return (r != null) ? r : (entry.ring ? entry.ring : -1)
   }
   , getQuadrant: (entry) => {
     const q = categoryQuadrantMap[entry.category]
@@ -65,18 +65,23 @@ let config = {
     entry.communityRating = getKeyForValue(communityRatingShapeMap, shapeLabel)
   }
   , handleSectorDrop: (entry, sector) => {
-    //console.log(`handleSectorDrop ${JSON.stringify(entry)} : ${JSON.stringify(sector)}`)
+    console.log(`handleSectorDrop ${JSON.stringify(entry)} : ${JSON.stringify(sector)}`)
     // if sector.quadrant <> getQuadrant(entry) then map sector.quadrant to category
     const category = getKeyForValue(categoryQuadrantMap, sector.quadrant)
-    const ambition = getKeyForValue(ambitionRingMap, sector.ring)
-    //console.log(`derived category and ambition ${category} and ${ambition}`)
-    entry.ambition = ambition
     entry.category = category
+    
+    const ambition = getKeyForValue(ambitionRingMap, sector.ring)
+    entry.ambition = ambition
+    console.log(`derived category and ambition ${category} and ${ambition} for ${JSON.stringify(entry)}`)
+    
   }, getColor: (entry) => {
     return entry.relevance ? relevanceColorMap[entry.relevance] : "green"
   }
   , handleColorPick: (entry, color) => {
     entry.relevance = getKeyForValue(relevanceColorMap, color)
+  }
+  , addEntry : () => { radarEntries.push({"label":"NEW"})
+
   }
 
 }

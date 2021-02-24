@@ -34,8 +34,8 @@ const rings = [
   { radius: 130 },
   { radius: 220 },
   { radius: 310 },
-  { radius: 400 },
-  { radius: 490 }
+  { radius: 400 }
+
 ];
 
 const title_offset =
@@ -62,13 +62,17 @@ const legend_image_offset = [
 let configuration;
 
 const getSectorForCoordinates = function (x, y) { // determine from the X and Y the associated ring and quadrant
-  const polarCoords = polar({ x: x - 720, y: y - 500 }) // r relates to ring, t to sector
+  const polarCoords = polar({ x: x, y: y })  // polar({ x: x - 720, y: y - 500 }) // r relates to ring, t to sector
   // take polarCoord.t, divide by PI and find the quadrant whose radial_min and max surround it
   polarCoords.piNormalizedAngle = polarCoords.t / Math.PI
   const sector = {}
   for (let i = 0; i < quadrants.length; i++) {
-    if (quadrants[i].radial_min <= polarCoords.piNormalizedAngle && quadrants[i].radial_max >= polarCoords.piNormalizedAngle)
+    if (quadrants[i].radial_min <= polarCoords.piNormalizedAngle &&
+      quadrants[i].radial_max >= polarCoords.piNormalizedAngle) {
+      console.log(`quadrant ${i} ${quadrants[i].radial_min}< ${polarCoords.piNormalizedAngle} < ${quadrants[i].radial_max}`)
       sector.quadrant = i
+      break
+    }
   }
   for (let i = 0; i < rings.length; i++) {
     if (polarCoords.r < rings[i].radius) {
@@ -76,12 +80,14 @@ const getSectorForCoordinates = function (x, y) { // determine from the X and Y 
       break
     }
   }
+  if (polarCoords.r > rings[rings.length - 1].radius) sector.ring = -1
   return sector;
 }
 
 function polar(cartesian) {
   var x = cartesian.x;
   var y = cartesian.y;
+
   return {
     t: Math.atan2(y, x),
     r: Math.sqrt(x * x + y * y)
@@ -122,14 +128,14 @@ function radar_visualization(config) {
     return Math.min(Math.max(value, low), high);
   }
 
-  function bounded_ring(polar, r_min, r_max) {
+  function bounded_ring(polar, r_min, r_max) {  // the returned polar coordinates are within the designated ring; the angle will be unchanged, the radius may be adjusted to fit in the allowed range
     return {
       t: polar.t,
       r: bounded_interval(polar.r, r_min, r_max)
     }
   }
 
-  function bounded_box(point, min, max) {
+  function bounded_box(point, min, max) {  // the returned x and y are within their alloted min and max - they can be unaltered if they already were within those boundaries
     return {
       x: bounded_interval(point.x, min.x, max.x),
       y: bounded_interval(point.y, min.y, max.y)
@@ -137,14 +143,18 @@ function radar_visualization(config) {
   }
 
   function segment(quadrant, ring) {
+    // polar_min and polar_max delimit the sectoral box for this q and r combination
+    // the t coordinate indicates the angle, the r the radius
     var polar_min = {
       t: quadrants[quadrant].radial_min * Math.PI,
-      r: ring === 0 ? 30 : rings[ring - 1].radius
+      r: ring === 0 ? 30 : (ring === -1 ? rings[rings.length - 1].radius : rings[ring - 1].radius)
     };
     var polar_max = {
       t: quadrants[quadrant].radial_max * Math.PI,
-      r: rings[ring].radius
+      r: ring === -1 ? 600 : rings[ring].radius
     };
+    // cartesian_min and cartesian_max indicate the rectangle within which the elements in this q and r should live
+    // the box indicated by these two coordinates is bigger than the actual area ) 
     var cartesian_min = {
       x: 15 * quadrants[quadrant].factor_x,
       y: 15 * quadrants[quadrant].factor_y
@@ -155,8 +165,8 @@ function radar_visualization(config) {
     };
     return {
       clipx: function (d) {
-        var c = bounded_box(d, cartesian_min, cartesian_max);
-        var p = bounded_ring(polar(c), polar_min.r + 15, polar_max.r - 15);
+        var c = bounded_box(d, cartesian_min, cartesian_max); // c is a point that is contrained by the q and r rectangle - but could still be outside the radius range 
+        var p = bounded_ring(polar(c), polar_min.r + 15, polar_max.r - 15); // p is an adjusted point that is within the right radius range 
         d.x = cartesian(p).x; // adjust data too!
         return d.x;
       },
@@ -177,26 +187,39 @@ function radar_visualization(config) {
 
   // position each entry randomly in its segment
   for (var i = 0; i < config.getEntries().length; i++) {
-    var entry = config.getEntries()[i];
-    entry.segment = segment(config.getQuadrant(entry), config.getRing(entry));
-    var point = entry.segment.random();
-    entry.x = point.x;
-    entry.y = point.y;
-    entry.color = entry.active || config.print_layout ?
-      config.rings[config.getRing(entry)].color : config.colors.inactive;
+    const entry = config.getEntries()[i];
+    const entryQuadrant = config.getQuadrant(entry)
+    const entryRing = config.getRing(entry)
+
+    const sector = getSectorForCoordinates(entry.x, entry.y)
+    entry.segment = segment(entryQuadrant, entryRing);
+    // if the x and y do not correspond to the segment
+    // derive a random point somewhere within the segment
+    if (entryRing != sector.ring || entryQuadrant != sector.quadrant) {
+      var point = entry.segment.random();
+      entry.x = point.x;
+      entry.y = point.y;
+    }
+    // we can fix an entry in its place by setting the fx and fy property; these are "respected" by the d3 force algorithm
+    entry.fx = null;
+    entry.fy = null;
+
+    entry.color = (entry.active || config.print_layout) && entryRing > -1 ?
+      config.rings[entryRing].color : config.colors.inactive;
   }
 
   // partition entries according to segments
   var segmented = new Array(4);
   for (var quadrant = 0; quadrant < 4; quadrant++) {
     segmented[quadrant] = new Array(4);
-    for (var ring = 0; ring < 4; ring++) {
+    for (var ring = -1; ring < 4; ring++) {
       segmented[quadrant][ring] = [];
     }
   }
   for (var i = 0; i < config.getEntries().length; i++) {
     var entry = config.getEntries()[i];
-    segmented[config.getQuadrant(entry)][config.getRing(entry)].push(entry);
+    if (config.getRing(entry) > -1)
+      segmented[config.getQuadrant(entry)][config.getRing(entry)].push(entry);
   }
 
   // assign unique sequential id to each entry
@@ -209,6 +232,8 @@ function radar_visualization(config) {
         entries[i].id = "" + id++;
       }
     }
+    // TODO assign id values to entries in ring -1
+    config.getEntries().filter((entry) => config.getRing(entry) == -1).forEach((entry) => { entry.id = "" + id++ })
   }
 
 
@@ -241,42 +266,34 @@ function radar_visualization(config) {
     radar.attr("transform", translate(config.width / 2, config.height / 2));
   }
 
-// add the new blip button
-//      <a id="plusButton" href="#" onclick="addBlip()">
-/* n<g transform="
-translate(1350 20) scale(0.8)
-">
-<Circle id="addBlipButton" cx="30" cy="30" r="25" stroke="black" fill="green" stroke-width="3" />
-<line x1="14" y1="30" x2="46" y2="30" stroke-width="5" stroke="white"></line>
-<line x1="30" y1="14" x2="30" y2="46" stroke-width="5" stroke="white"></line>
-</g>
-</a>*/
-const addButton = radar.append("g")
-             .attr("id","plusBlipButton")
-             .attr("transform", `translate(${config.width / 2 -100 } ${-1 * config.height / 2}) scale(0.8)`)
-             .on("click", addBlip);
- addButton.append("circle")
-      .attr("r", 25)
-      .attr("cx", 30)            
-      .attr("cy", 30)         
-      .attr("stroke","black")   
-      .attr("stroke-width",3)   
-      .attr("fill","green")
-      addButton.append("line")
-      .attr("x1", 14)
-      .attr("y1", 30)            
-      .attr("x2", 46)         
-      .attr("y2", 30)            
-      .attr("stroke","white")   
-      .attr("stroke-width",5)   
-      addButton.append("line")
-      .attr("x1", 30)
-      .attr("y1", 14)            
-      .attr("x2", 30)         
-      .attr("y2", 46)            
-      .attr("stroke","white")   
-      .attr("stroke-width",5)   
-            
+  // add the new blip button
+
+  const addButton = radar.append("g")
+    .attr("id", "plusBlipButton")
+    .attr("transform", `translate(${config.width / 2 - 100} ${-1 * config.height / 2}) scale(0.8)`)
+    .on("click", addBlip);
+  addButton.append("circle")
+    .attr("r", 25)
+    .attr("cx", 30)
+    .attr("cy", 30)
+    .attr("stroke", "black")
+    .attr("stroke-width", 3)
+    .attr("fill", "green")
+  addButton.append("line")
+    .attr("x1", 14)
+    .attr("y1", 30)
+    .attr("x2", 46)
+    .attr("y2", 30)
+    .attr("stroke", "white")
+    .attr("stroke-width", 5)
+  addButton.append("line")
+    .attr("x1", 30)
+    .attr("y1", 14)
+    .attr("x2", 30)
+    .attr("y2", 46)
+    .attr("stroke", "white")
+    .attr("stroke-width", 5)
+
   var grid = drawRadarGrid(radar, config);
   drawRings(rings, grid, config);
   if (config.print_layout) {
@@ -293,15 +310,18 @@ const addButton = radar.append("g")
   // make sure that blips stay inside their segment
   function ticked() {
     blips.attr("transform", function (d) {
-      return translate(d.segment.clipx(d), d.segment.clipy(d));
+      const translatedY = d.segment.clipy(d)
+      const translatedX = d.segment.clipx(d)
+      return translate(translatedX, translatedY);
     })
   }
 
-  // distribute blips, while avoiding collisions
+  // distribute blips, while avoiding collisions - see https://www.d3indepth.com/force-layout/
   d3.forceSimulation()
     .nodes(config.getEntries())
     .velocityDecay(0.19) // magic number (found by experimentation)
-    .force("collision", d3.forceCollide().radius(12).strength(0.85))
+    .force("collision", d3.forceCollide().radius(18).strength(0.85)) // prevent collision;  radius is for the bubble around each blip center
+    //.force('charge', d3.forceManyBody().strength(-40)) // repel
     .on("tick", ticked);
 } //end of function radar_visualization
 
@@ -345,13 +365,144 @@ function drawLegend(radar, translate, title_offset, config, footer_offset, legen
     .style("font-size", "34px");
 
   // footer
-  radar.append("text")
-    .attr("transform", translate(footer_offset.x, footer_offset.y))
-    .text("▲ moved up     ▼ moved down")
+  if (config.blipColors != null) {
+    const colorBox = radar.append("g")
+      .attr("id", "legend-colors")
+      .attr("transform", translate(footer_offset.x, footer_offset.y))
+    colorBox.append("text")
+      .text(config.blipColors.colorTitle)
+      .attr("xml:space", "preserve")
+      .style("font-family", "Arial, Helvetica")
+      .style("font-size", "10px");
+
+    let i = 0
+    let x = 40, y = 1
+    for (const colorOption in config.blipColors.colorOptions) {
+      colorBox.append('circle')
+        .attr("r", 10)
+        .attr("fill", config.blipColors.colorOptions[colorOption])
+        .attr("cx", x + 25 + i * 38)
+        .attr("cy", y - 5)
+      i++
+    }
+  }
+
+  if (config.blipSizes != null) {
+
+  const sizeBox = radar.append("g")
+    .attr("id", "legend-sizes")
+    .attr("transform", translate(footer_offset.x, footer_offset.y + 30))
+    sizeBox
+    .append("text")
+    .text(config.blipSizes.sizeTitle)
     .attr("xml:space", "preserve")
     .style("font-family", "Arial, Helvetica")
     .style("font-size", "10px");
 
+    let x = 40, y = 1
+    const sizes = [0, 1, 2, 3]
+    for (let i = 0; i < sizes.length; i++) {
+        sizeBox.append('circle')
+            .attr("r", 3 * (i + 2))
+            .attr("fill", "black")
+            .attr("cx", x + 25 + i * 38)
+            .attr("cy", y )
+    }
+  }
+
+
+  if (config.blipShapes != null) {
+const shapeBox =
+    radar.append("g")
+      .attr("id", "legend-colors")
+      .attr("transform", translate(footer_offset.x, footer_offset.y + 70))
+shapeBox
+      .append("text")
+      .text(config.blipShapes.shapeTitle)
+      .attr("xml:space", "preserve")
+      .style("font-family", "Arial, Helvetica")
+      .style("font-size", "10px");
+      let x = 40, y = 1
+      let i=0
+      for (const shapeOption in config.blipShapes.shapeOptions) {
+        let shape = null
+        let desiredShape = config.blipShapes.shapeOptions[shapeOption]
+        let transform = ""
+        let posX = x + (i + 1) * 45 + 20
+        let posY = y 
+        const triangle = d3.symbol().type(d3.symbolTriangle).size(350);
+
+        if (desiredShape == "triangleUp") {
+            shape = shapeBox.append("path")
+                .attr("d", triangle)
+                ;
+        }
+
+        // cater for circle, square, diamond, .. 
+        if (desiredShape == "circle") {
+            shape = shapeBox.append('circle')
+                .attr("r", 13)
+                .attr("cx", posX) // TODO proper value
+                .attr("cy", posY)
+        }
+
+        if (desiredShape == "square") {
+            shape = shapeBox.append('rect')
+                .attr('x', -13) // TODO correct
+                .attr('y', -15)
+                .attr('width', 26)
+                .attr('height', 26)
+        }
+
+        if (desiredShape == "triangleRight") {
+            shape = shapeBox.append("path")
+                .attr("d", triangle)
+                ;
+            transform = `rotate(90 ${posX} ${posY - 2}) `
+        }
+        if (desiredShape == "triangleDown") {
+            shape = shapeBox.append("path")
+                .attr("d", triangle)
+            transform = `rotate(-180 ${posX} ${posY - 4})`
+
+        }
+        if (desiredShape == "diamond") {
+            shape = shapeBox.append('rect')
+                .attr('width', 20)
+                .attr('height', 20)
+
+            transform = `rotate(45 ${posX + 15} ${posY - 13})`
+        }
+        if (desiredShape == "star") {
+            const star = d3.symbol().type(d3.symbolStar).size(350);
+            shape = shapeBox.append("path")
+                .attr("d", star)
+                ;
+
+        }
+        if (desiredShape == "triangleLeft") {
+            shape = shapeBox.append("path")
+                .attr("d", triangle)
+            transform = `rotate(-90 ${posX} ${posY}) `
+        }
+        if (desiredShape == "rectUp") {
+            shape = shapeBox.append('rect')
+                //            .attr('x', x + 120)
+                //          .attr('y', y + 108)
+                .attr('width', 8)
+                .attr('height', 26)
+        }
+        // fill it up and move it to the right place
+        if (shape != null) {
+            shape.attr("style", "fill:green")
+                .attr("transform", `${transform} translate(${posX},${posY})`)
+          
+        }
+        i++
+    }
+
+
+  }
   // legend
   var legend = radar.append("g");
   for (var quadrant = 0; quadrant < 4; quadrant++) {
@@ -375,31 +526,38 @@ function drawLegend(radar, translate, title_offset, config, footer_offset, legen
     }
 
     for (var ring = 0; ring < 4; ring++) {
-      legend.append("text")
-        .attr("transform", legend_transform(quadrant, ring, segmented))
-        .text(config.rings[ring].name)
-        .style("font-family", "Arial, Helvetica")
-        .style("font-size", "12px")
-        .style("font-weight", "bold");
-      legend.selectAll(".legend" + quadrant + ring)
-        .data(segmented[quadrant][ring])
-        .enter()
-        .append("a")
-        .attr("href", function (d, i) {
-          return d.link ? d.link : "#"; // stay on same page if no link was provided
-        })
-        .append("text")
-        .attr("transform", function (d, i) { return legend_transform(quadrant, ring, segmented, i); })
-        .attr("class", "legend" + quadrant + ring)
-        .attr("id", function (d, i) { return "legendItem" + d.id; })
-        .text(function (d, i) { return d.id + ". " + d.label; })
-        .style("font-family", "Arial, Helvetica")
-        .style("font-size", "11px")
-        .on("mouseover", function (d) { showBubble(d); highlightLegendItem(d); })
-        .on("mouseout", function (d) { hideBubble(d); unhighlightLegendItem(d); });
+      writeLegendEntries(config.rings[ring].name, segmented[quadrant][ring], quadrant, ring);
     }
+    const entriesOutsideOfRings = config.getEntries().filter((entry) => config.getRing(entry) == -1 && config.getQuadrant(entry) == quadrant)
+    writeLegendEntries("PENDING", entriesOutsideOfRings, quadrant, -1);
+
   }
 
+
+  function writeLegendEntries(ringLabel, ringEntries, quadrant, ring) {
+    legend.append("text")
+      .attr("transform", legend_transform(quadrant, ring, segmented))
+      .text(ringLabel)
+      .style("font-family", "Arial, Helvetica")
+      .style("font-size", "12px")
+      .style("font-weight", "bold");
+    legend.selectAll(".legend" + quadrant + ring)
+      .data(ringEntries)
+      .enter()
+      .append("a")
+      .attr("href", function (d, i) {
+        return d.link ? d.link : "#"; // stay on same page if no link was provided
+      })
+      .append("text")
+      .attr("transform", function (d, i) { return legend_transform(quadrant, ring, segmented, i); })
+      .attr("class", "legend" + quadrant + ring)
+      .attr("id", function (d, i) { return "legendItem" + d.id; })
+      .text(function (d, i) { return d.id + ". " + d.label; })
+      .style("font-family", "Arial, Helvetica")
+      .style("font-size", "11px")
+      .on("mouseover", function (d) { showBubble(d); highlightLegendItem(d); })
+      .on("mouseout", function (d) { hideBubble(d); unhighlightLegendItem(d); });
+  }
 }
 
 function drawRings(rings, grid, config) {
@@ -465,6 +623,12 @@ function legend_transform(quadrant, ring, segmented, index = null) {
   if (ring % 2 === 1) {
     dy = dy + 36 + segmented[quadrant][ring - 1].length * 12;
   }
+  // TODO hard coded - assuming 4 rings and PENDING displayed underneath the fourth ring
+  if (ring == -1) {
+    dx = 120
+    dy = dy + 36 + segmented[quadrant][2].length * 12 + 36 + segmented[quadrant][3].length * 12;
+  }
+
   return translate(
     legend_offset[quadrant].x + dx,
     legend_offset[quadrant].y + dy

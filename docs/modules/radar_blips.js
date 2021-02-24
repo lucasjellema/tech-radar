@@ -72,16 +72,16 @@ function drawBlip(blip, d, config) {
             .attr('height', 40)
             .attr("x", "-40") // if on left side, then move to the left, if on the right side then move to the right
             .attr("y", "-15");
-            // scale logo with factor derived from size
-            if (getCurrentConfiguration().getSize != null) {
-                let scaleFactor = 1;
-                if (getCurrentConfiguration().getSize(d) == 0)
-                    scaleFactor = 0.6;
-                if (getCurrentConfiguration().getSize(d) > 1)
-                    scaleFactor = 1 + (getCurrentConfiguration().getSize(d) - 1) / 5;
-                scaleFactor = scaleFactor * 1.3;
-                image.attr("transform", `scale(${scaleFactor} ${scaleFactor})`); // derive scale based on SIZE of entryAmbition
-            }
+        // scale logo with factor derived from size
+        if (getCurrentConfiguration().getSize != null) {
+            let scaleFactor = 1;
+            if (getCurrentConfiguration().getSize(d) == 0)
+                scaleFactor = 0.6;
+            if (getCurrentConfiguration().getSize(d) > 1)
+                scaleFactor = 1 + (getCurrentConfiguration().getSize(d) - 1) / 5;
+            scaleFactor = scaleFactor * 1.3;
+            image.attr("transform", `scale(${scaleFactor} ${scaleFactor})`); // derive scale based on SIZE of entryAmbition
+        }
     }
 
     // svg text properties: https://vanseodesign.com/web-design/svg-text-font-properties/ 
@@ -93,7 +93,7 @@ function drawBlip(blip, d, config) {
                 scaleFactor = 0.6;
             if (getCurrentConfiguration().getSize(d) > 1)
                 scaleFactor = 1 + (getCurrentConfiguration().getSize(d) - 1) / 2;
-            
+
             fontSize = Math.round(fontSize * scaleFactor)
         }
         blip.append("text")
@@ -155,7 +155,7 @@ function drawBlip(blip, d, config) {
             const square = d3.symbol().type(d3.symbolSquare).size(350);
             shape = blip.append("path")
                 .attr("d", square)
-        }  else if (requiredShape == "triangleRight") {
+        } else if (requiredShape == "triangleRight") {
             const triangleRight = d3.symbol().type(d3.symbolTriangle).size(350);
             shape = blip.append("path")
                 .attr("d", triangleRight) //TODO make right pointing
@@ -184,14 +184,16 @@ function drawBlip(blip, d, config) {
         }
         // blip text to be printed inside the shape - currently the randomly assigned sequence number
         if (d.active || config.print_layout) {
-            var blip_text = config.print_layout ? d.id : d.label.match(/[a-z]/i);
+            var blip_text = config.print_layout ? (d.id == null ? "0" : d.id) : d.label.match(/[a-z]/i);
             blip.append("text")
                 .text(blip_text)
                 .attr("y", 3)
                 .attr("text-anchor", "middle")
                 .style("fill", "#fff")
                 .style("font-family", "Arial, Helvetica")
-                .style("font-size", function (d) { return blip_text.length > 2 ? "8px" : "9px"; })
+                .style("font-size", function (d) {
+                    return blip_text.length > 2 ? "8px" : "9px";
+                })
                 .style("pointer-events", "none")
                 .style("user-select", "none");
         }
@@ -207,15 +209,23 @@ function hideBubble(d) {
 
 function highlightLegendItem(d) {
     var legendItem = document.getElementById("legendItem" + d.id);
-    legendItem.setAttribute("filter", "url(#solid)");
-    legendItem.setAttribute("fill", "white");
+    if (legendItem != null) {
+
+        legendItem.setAttribute("filter", "url(#solid)");
+        legendItem.setAttribute("fill", "white");
+    }
 }
 
 function unhighlightLegendItem(d) {
     var legendItem = document.getElementById("legendItem" + d.id);
-    legendItem.removeAttribute("filter");
-    legendItem.removeAttribute("fill");
+    if (legendItem != null) {
+
+        legendItem.removeAttribute("filter");
+        legendItem.removeAttribute("fill");
+    }
 }
+
+
 
 function legend_transform(quadrant, ring, segmented, index = null) {
     var dx = ring < 2 ? 0 : 120;
@@ -363,8 +373,8 @@ function contextMenu() {
 
             if (desiredShape == "square") {
                 shape = shapeBox.append('rect')
-                   .attr('x', -13) // TODO correct
-                   .attr('y', -15)
+                    .attr('x', -13) // TODO correct
+                    .attr('y', -15)
                     .attr('width', 26)
                     .attr('height', 26)
             }
@@ -415,7 +425,7 @@ function contextMenu() {
             }
             i++
         }
-       
+
         // built in D3 symbols http://using-d3js.com/05_10_symbols.html
         // d3.symbolCross - A cross or plus
         // d3.symbolDiamond - A diamond
