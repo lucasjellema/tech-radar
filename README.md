@@ -1,26 +1,36 @@
-# AMIS | Conclusion Technology Radar
+# AMIS | Conclusion Technology Radar PROTOTYPE
 
 Clone from the Zalando Tech Radar (https://github.com/zalando/tech-radar)
 
-A number of modifications are intended:
+A number of modifications have been prototyped in this repo:
 = technology selection for AMIS
 - richer data model for the blips (the entries in the radar)
+- blip display mode image and text in addition to shape
 - extended presentation for the blips
   - size
   - color
-  - shape
+  - shape (triangle - pointing four ways, square, diamond, rectangle horizontal & vertical, star)
   - content of bubble/balloon text
-  - filter on labels
+  - filter on tags for entries
   - tag cloud for the labels?
   - additional attributes for blips: 
     - rationale
     - logo
     - vendor
     - priority/weight (volume)
+- drag & drop to move blips around (and assign categories & status by doing so)
+- popup window with details on blip/entry (double click on blip)
+- context menu for assigning color, shape and size to blip
+- allowing blips outside of rings
+- creation of new blips
+- export all data to downloadable file
+- import data from a file
+- save/load data from Browser Local Storage
 
+Note that even though these features are working - the code is not clean nor professional. It is a mash (mess?) of code snippets welded together in an unsustainable way. It provides some answers (can that be done?) and inspiration of subsequent implementations. Those next ge n tech radars should not be created on top of this repo, but rather from scratch. Unfortunately, that is how it has to be.
 
 # Entries
-The file entries.js contain the data that is visualized in the radar. This seem data could be retrieved using an HTTP request to an API or from an external URL.
+The file entries.js contain the data that is visualized in the radar. Data could also be retrieved using an HTTP request to an API or from an external URL or read from local storage.
 
 Each entry represents both:
 * objective: a technology, concept, product, cloud service, open source project
